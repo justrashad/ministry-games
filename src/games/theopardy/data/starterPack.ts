@@ -32,7 +32,7 @@ export const STARTER_PACK: CluePack = {
     clue('st-kings-2', KINGS, 2, 'This son of David asked Jehovah for wisdom to judge the people instead of asking for riches.', 'Solomon', '1 Kings 3:9-11'),
     clue('st-kings-3', KINGS, 3, 'The first king of Israel, a tall man from the tribe of Benjamin.', 'Saul', '1 Samuel 9:1, 2; 10:1'),
     clue('st-kings-4', KINGS, 4, 'He became king of Judah at eight years old. During his reign the book of the Law was found in the temple.', 'Josiah', '2 Kings 22:1, 8'),
-    clue('st-kings-5', KINGS, 5, 'While this king ruled Judah, an angel struck down 185,000 Assyrian soldiers in one night.', 'Hezekiah', '2 Kings 19:35'),
+    clue('st-kings-5', KINGS, 5, 'While this king ruled Judah, an angel struck down 185,000 Assyrian soldiers in one night.', 'Hezekiah', '2 Kings 19:15, 35'),
 
     clue('st-prophets-1', PROPHETS, 1, 'He spent three days and three nights inside a huge fish.', 'Jonah', 'Jonah 1:17'),
     clue('st-prophets-2', PROPHETS, 2, 'He was thrown into a pit of lions because he kept praying to Jehovah.', 'Daniel', 'Daniel 6:10, 16'),
@@ -66,15 +66,15 @@ export const STARTER_PACK: CluePack = {
 
     clue('st-animals-1', ANIMALS, 1, 'In the garden of Eden, this creature spoke to Eve.', 'A serpent', 'Genesis 3:1', ['Serpent', 'Snake', 'A snake']),
     clue('st-animals-2', ANIMALS, 2, 'This bird came back to Noah in the ark carrying an olive leaf.', 'A dove', 'Genesis 8:11', ['Dove']),
-    clue('st-animals-3', ANIMALS, 3, 'These birds brought Elijah bread and meat while he stayed by the Valley of Cherith.', 'Ravens', '1 Kings 17:6'),
+    clue('st-animals-3', ANIMALS, 3, 'These birds brought Elijah bread and meat while he stayed by the Valley of Cherith.', 'Ravens', '1 Kings 17:3-6'),
     clue('st-animals-4', ANIMALS, 4, 'This animal spoke to Balaam after he struck it three times.', 'A donkey', 'Numbers 22:28', ['Donkey', 'A female donkey', 'An ass']),
     clue('st-animals-5', ANIMALS, 5, 'Samson caught 300 of these animals and tied torches between their tails.', 'Foxes', 'Judges 15:4'),
 
     clue('st-exodus-1', EXODUS, 1, 'As a baby he was placed in a basket among the reeds of the Nile River.', 'Moses', 'Exodus 2:3-10'),
-    clue('st-exodus-2', EXODUS, 2, 'The brother of Moses, who spoke for him before Pharaoh.', 'Aaron', 'Exodus 4:14-16'),
+    clue('st-exodus-2', EXODUS, 2, 'The brother of Moses, who spoke for him before Pharaoh.', 'Aaron', 'Exodus 4:14-16; 7:1, 2'),
     clue('st-exodus-3', EXODUS, 3, 'Jehovah parted this sea so that Israel could cross on dry ground.', 'The Red Sea', 'Exodus 14:21, 22', ['Red Sea']),
     clue('st-exodus-4', EXODUS, 4, 'The food Jehovah provided for Israel during 40 years in the wilderness.', 'Manna', 'Exodus 16:31, 35'),
-    clue('st-exodus-5', EXODUS, 5, 'The father-in-law of Moses, who advised him to choose capable men to help judge the people.', 'Jethro', 'Exodus 18:17-21', ['Reuel']),
+    clue('st-exodus-5', EXODUS, 5, 'The father-in-law of Moses, who advised him to choose capable men to help judge the people.', 'Jethro', 'Exodus 18:1, 17-21', ['Reuel']),
 
     clue('st-books-1', BOOKS, 1, 'The first book of the Bible.', 'Genesis'),
     clue('st-books-2', BOOKS, 2, 'The last book of the Bible.', 'Revelation'),
@@ -95,10 +95,10 @@ export const STARTER_PACK: CluePack = {
     clue('st-family-5', FAMILY, 5, 'The grandmother of Timothy, remembered for her faith.', 'Lois', '2 Timothy 1:5'),
 
     clue('st-early-1', EARLY, 1, 'The name the apostle Paul was known by when he persecuted the congregation.', 'Saul', 'Acts 8:3; 13:9', ['Saul of Tarsus']),
-    clue('st-early-2', EARLY, 2, 'He was stoned to death after giving a bold witness before the Sanhedrin.', 'Stephen', 'Acts 7:59, 60'),
+    clue('st-early-2', EARLY, 2, 'He was stoned to death after giving a bold witness before the Sanhedrin.', 'Stephen', 'Acts 6:12, 15; 7:59, 60'),
     clue('st-early-3', EARLY, 3, 'Also called Dorcas, this disciple in Joppa was raised from the dead by Peter.', 'Tabitha', 'Acts 9:36-41'),
     clue('st-early-4', EARLY, 4, 'An army officer in Caesarea. Peter was sent to his home, and he and his household were baptized.', 'Cornelius', 'Acts 10:1, 24, 48'),
-    clue('st-early-5', EARLY, 5, 'This married couple were tentmakers who worked alongside Paul in Corinth. Name both.', 'Aquila and Priscilla', 'Acts 18:2, 3', ['Priscilla and Aquila', 'Aquila and Prisca', 'Prisca and Aquila']),
+    clue('st-early-5', EARLY, 5, 'This married couple were tentmakers who worked alongside Paul in Corinth. Name both.', 'Aquila and Priscilla', 'Acts 18:1-3', ['Priscilla and Aquila', 'Aquila and Prisca', 'Prisca and Aquila']),
   ],
   finals: [
     clue('st-final-1', FINAL, 5, 'He lived 969 years, longer than anyone else in the Bible record.', 'Methuselah', 'Genesis 5:27'),
