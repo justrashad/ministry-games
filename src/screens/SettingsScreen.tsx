@@ -15,6 +15,7 @@ import { NumberField, SelectField } from '../components/ui/Fields';
 import { Segmented } from '../components/ui/Segmented';
 import { Tabs } from '../components/ui/Tabs';
 import { Toggle } from '../components/ui/Toggle';
+import { soundPrefs } from '../audio/prefs';
 import { useToast } from '../components/ui/Toast';
 
 type Tab = 'game' | 'rules' | 'timing' | 'audio' | 'visuals' | 'questions' | 'challenge' | 'data';
@@ -59,6 +60,7 @@ function SecondsPicker({ label, value, presets, onChange, allowOff, offValue = 0
 
 export function SettingsScreen() {
   const settings = useSettings();
+  const soundOpts = soundPrefs.useValue();
   const { sets } = useLibrary();
   const [tab, setTab] = useState<Tab>('game');
   const confirm = useConfirm();
@@ -183,7 +185,9 @@ export function SettingsScreen() {
       case 'audio':
         return (
           <div className="space-y-6">
-            <Toggle checked={settings.audio.enabled} onChange={(enabled) => updateSettings('audio', { enabled })} label={t('Sound effects')} description={sound.isSupported() ? t('Simple original tones. The game works the same with sound off.') : t('This browser does not support sound.')} disabled={!sound.isSupported()} />
+            <Toggle checked={settings.audio.enabled} onChange={(enabled) => updateSettings('audio', { enabled })} label={t('Sound effects')} description={sound.isSupported() ? t('Original sound effects. The game works the same with sound off.') : t('This browser does not support sound.')} disabled={!sound.isSupported()} />
+            <Toggle checked={soundOpts.music} onChange={(on) => soundPrefs.set((p) => ({ ...p, music: on }))} label={t('Theme music')} description={t('Original theme music on the title screen and at the end of the game.')} disabled={!settings.audio.enabled} />
+            <Toggle checked={soundOpts.crowd} onChange={(on) => soundPrefs.set((p) => ({ ...p, crowd: on }))} label={t('Studio audience')} description={t('Applause, cheers, and an aww when a strike is called.')} disabled={!settings.audio.enabled} />
             <div>
               <label htmlFor="volume" className="field-label">
                 {t('Volume: {n}%', { n: Math.round(settings.audio.volume * 100) })}

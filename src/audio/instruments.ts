@@ -36,7 +36,7 @@ export function hz(note: string): number {
 }
 
 /** The node a note connects to: its bus, plus a send to the reverb and a pan. */
-function output(ctx: AudioContext, out: Out, _t: number, stopAt: number): AudioNode | null {
+export function output(ctx: AudioContext, out: Out, _t: number, stopAt: number): AudioNode | null {
   const bus = out.dest ?? audio.bus(out.bus);
   if (!bus) return null;
   const node = ctx.createGain();

@@ -3,6 +3,7 @@
  * files and no borrowed game-show sounds. Everything is a no-op if audio is unsupported.
  */
 import { audio } from '../audio/engine';
+import { crowd } from '../audio/crowd';
 import { boom, chord, drum, hz, note, run, sparkle, whoosh } from '../audio/instruments';
 import { DRY, playKit, SFX, WET, type SoundKit } from '../audio/sfx';
 
@@ -39,6 +40,7 @@ function fanfare(t: number, big: boolean): void {
 
 const KIT: SoundKit<SoundName> = {
   gameStart: (t) => {
+    crowd('applause', t + 0.7, 0.6);
     whoosh(SFX, t, 0.45, 300, 5000, 0.5);
     fanfare(t + 0.35, true);
   },
@@ -49,6 +51,7 @@ const KIT: SoundKit<SoundName> = {
     drum('crash', WET, t + 0.5, 0.6);
   },
   finalRound: (t) => {
+    crowd('ooh', t + 0.6, 0.55);
     for (let i = 0; i < 10; i++) drum('tom', DRY, t + i * 0.06, 0.25 + i * 0.06);
     chord('brass', WET, t + 0.65, ['D4', 'F#4', 'A4', 'D5'], 1.4, 1);
     boom(SFX, t + 0.65, 0.9);
@@ -60,11 +63,13 @@ const KIT: SoundKit<SoundName> = {
     note('glock', SFX, t + 0.16, hz('A6'), 0.2, 0.5);
   },
   correct: (t) => {
+    crowd('applauseShort', t + 0.15, 0.5);
     run('bell', WET, t, ['E5', 'A5', 'C#6', 'E6'], 0.065, 0.35, 0.85);
     drum('clap', SFX, t + 0.2, 0.5);
     sparkle(WET, t + 0.25, 4, GLITTER, 0.3, 0.4);
   },
   strike: (t) => {
+    crowd('aww', t + 0.1, 0.65);
     // A deep, round "bwomp" rather than a harsh buzzer.
     note('brass', SFX, t, hz('Eb3'), 0.22, 0.9, { glideTo: hz('C3') });
     note('brass', SFX, t + 0.24, hz('B2'), 0.5, 0.9);
@@ -72,13 +77,20 @@ const KIT: SoundKit<SoundName> = {
     drum('kick', SFX, t, 0.7);
   },
   steal: (t) => {
+    crowd('ooh', t, 0.55);
     whoosh(SFX, t, 0.9, 200, 6000, 0.6);
     note('lead', SFX, t, hz('A3'), 0.8, 0.7, { glideTo: hz('A4') });
     [0.2, 0.4, 0.6, 0.75].forEach((d) => drum('tom', DRY, t + d, 0.55));
     chord('strings', WET, t + 0.85, ['D4', 'F4', 'A4'], 0.8, 0.9);
   },
-  stealSuccess: (t) => fanfare(t, false),
-  roundWin: (t) => fanfare(t, false),
+  stealSuccess: (t) => {
+    crowd('cheer', t + 0.3, 0.65);
+    fanfare(t, false);
+  },
+  roundWin: (t) => {
+    crowd('cheer', t + 0.3, 0.65);
+    fanfare(t, false);
+  },
   tick: (t) => note('marimba', DRY, t, hz('C7'), 0.05, 0.55),
   timeUp: (t) => {
     note('brass', SFX, t, hz('G4'), 0.2, 0.9);
@@ -97,6 +109,7 @@ const KIT: SoundKit<SoundName> = {
     note('lead', SFX, t, hz('E5'), 0.25, 0.6);
   },
   celebrate: (t) => {
+    crowd('bigCheer', t + 0.4, 0.75);
     [0, 0.08, 0.16, 0.24, 0.32, 0.4].forEach((d, i) => drum(i % 2 ? 'snare' : 'tom', DRY, t + d, 0.5 + i * 0.07));
     fanfare(t + 0.48, true);
     run('glock', WET, t + 1.3, ['F5', 'A5', 'C6', 'F6', 'A6', 'C7'], 0.06, 0.3, 0.6);
