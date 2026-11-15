@@ -69,6 +69,7 @@ export default function App() {
     return (
       <>
         <UpdatePrompt quiet />
+        {route !== '/game' && <div className="sb-rainbow-bar" aria-hidden />}
         <Screen route={route} />
       </>
     );
@@ -76,7 +77,8 @@ export default function App() {
 
   const reconnecting = remote.role === 'remote' && remote.phase === 'reconnecting';
   return (
-    <div className="mx-auto flex min-h-[100dvh] max-w-4xl flex-col px-4 pb-10">
+    <div className="mx-auto flex min-h-[100dvh] max-w-4xl flex-col px-4 pb-10 pt-2">
+      <div className="sb-rainbow-bar" aria-hidden />
       <header className="flex flex-wrap items-center justify-between gap-3 py-4">
         <button type="button" className="rounded-lg" onClick={() => navigate('/')} aria-label={t('Home')}>
           <Wordmark className="text-3xl" />

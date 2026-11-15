@@ -59,7 +59,7 @@ export const TITLES: Record<string, TitleInfo> = {
     description: 'A Bible quiz for two teams, from Newborn to Mature questions, designed for family worship.',
     storagePrefix: 'spiritual-babe:',
     peerPrefix: 'spiritual-babe-v1-',
-    themeColor: '#EA580C',
+    themeColor: '#1F2937',
     backgroundColor: '#FFFFFF',
   },
 };

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { BookOpen } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
 import { RemotePanel } from '../components/RemotePanel';
-import { BoardView, formatSeconds, HelpChips, Ladders, STAGE_NAMES, TEAMS, useSecondsLeft, Wordmark } from '../components/parts';
+import { BoardView, boxColor, formatSeconds, HelpChips, Ladders, RainbowWord, STAGE_NAMES, TEAMS, useSecondsLeft, Wordmark } from '../components/parts';
 import { activeQuestion, gameWinner, rungs } from '../engine/game';
 import { useGameSounds, useKeyboardJudge, useUnlockSound } from '../hooks/useGameEffects';
 import { useGameState } from '../sync/gameStore';
@@ -31,9 +31,13 @@ function TeamBanner({ team, text }: { team: TeamIndex; text: string }) {
   return <p className={`sb-team-${team} sb-pop self-start rounded-2xl px-[2vw] py-[1vh] text-[clamp(1.1rem,2.3vw,2.7rem)] font-extrabold`}>{text}</p>;
 }
 
-function Card({ label, children }: { label: string; children: ReactNode }) {
+/** The question card, in the color of the box it came from, or the whole rainbow for the bonus question. */
+function Card({ label, color, children }: { label: string; color?: string; children: ReactNode }) {
   return (
-    <section className="sb-card sb-pop flex min-h-0 flex-1 flex-col justify-center gap-[2.5vh] rounded-[1.4vw] px-[4vw] py-[3vh]">
+    <section
+      className={`${color ? 'text-white' : 'sb-rainbow-card'} sb-pop flex min-h-0 flex-1 flex-col justify-center gap-[2.5vh] rounded-[1.4vw] px-[4vw] py-[3vh]`}
+      style={color ? { backgroundColor: color, textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)' } : undefined}
+    >
       <p className="text-[clamp(0.9rem,1.6vw,1.9rem)] font-bold uppercase tracking-wider">{label}</p>
       {children}
     </section>
@@ -46,7 +50,7 @@ function Lookup({ reference, until }: { reference?: string; until: number | null
   const left = useSecondsLeft(until);
   if (left === null) return null;
   return (
-    <div className="sb-pop flex flex-wrap items-center gap-[1.5vw] rounded-2xl bg-sb-soft px-[2vw] py-[1vh] text-sb-soft-text">
+    <div className="sb-pop flex flex-wrap items-center gap-[1.5vw] rounded-2xl px-[2vw] py-[1vh] text-white" style={{ backgroundColor: 'var(--sb-box-5)' }}>
       <BookOpen aria-hidden className="h-[clamp(1.4rem,2.6vw,3rem)] w-[clamp(1.4rem,2.6vw,3rem)]" />
       <p className="text-[clamp(1.1rem,2.3vw,2.7rem)] font-extrabold">{reference ? t('Look up {reference}', { reference }) : t('Search the Scriptures')}</p>
       <p className="text-[clamp(1.1rem,2.3vw,2.7rem)] font-extrabold tabular-nums" role="timer">
@@ -69,6 +73,7 @@ export function GameScreen() {
         <Wordmark className="text-[clamp(2.5rem,7vw,7rem)]" />
         <p className="text-2xl font-semibold text-sb-muted">{t('Waiting for the host to start a game.')}</p>
         <p className="max-w-xl text-lg text-sb-muted">{t('Keep this window on the TV. Start the game from the host controls on this computer, or connect a phone.')}</p>
+        <div className="sb-rainbow-bar" aria-hidden />
         <RemotePanel />
       </main>
     );
@@ -78,6 +83,7 @@ export function GameScreen() {
   const a = state.active;
   const question = activeQuestion(state);
   const label = a && question ? `${t(STAGE_NAMES[a.stage])} · ${question.category}` : '';
+  const color = a ? boxColor(a.stage, a.slot, state.config.perStage) : undefined;
 
   let view: ReactNode;
   switch (state.phase) {
@@ -110,7 +116,7 @@ export function GameScreen() {
     case 'missed':
       view = a && question && (
         <Frame state={state} middle={a.retry ? t('Second Try') : label} active={a.team}>
-          <Card label={label}>
+          <Card label={label} color={color}>
             <p className={QUESTION}>{question.prompt}</p>
           </Card>
           <Lookup reference={question.reference} until={a.lookupUntil} />
@@ -129,7 +135,7 @@ export function GameScreen() {
     case 'reveal':
       view = a && question && (
         <Frame state={state} middle={label} active={a.team}>
-          <Card label={label}>
+          <Card label={label} color={color}>
             <p className="text-[clamp(1rem,2vw,2.4rem)] font-semibold">{question.prompt}</p>
             <p className={BIG}>{question.answer}</p>
             {question.reference && <p className="text-[clamp(0.9rem,1.7vw,2rem)] font-semibold">{question.reference}</p>}
@@ -147,7 +153,9 @@ export function GameScreen() {
       view = (
         <Frame state={state} middle={t('Bonus question')}>
           <div className="flex flex-1 flex-col items-center justify-center gap-[3vh] text-center">
-            <p className={`${BIG} sb-pop`}>{t('Bonus question')}</p>
+            <p className={`${BIG} sb-pop`}>
+              <RainbowWord text={t('Bonus question')} />
+            </p>
             <p className={`${NOTE} max-w-[55vw] text-sb-muted`}>{t('One Mature question for both teams. Talk it over and write down your answer. A right answer is one more rung.')}</p>
           </div>
         </Frame>
@@ -189,7 +197,7 @@ export function GameScreen() {
       view = (
         <Frame state={state} middle={t('Game over')} active={winner === 'tie' ? null : winner}>
           <div className="flex flex-1 flex-col items-center justify-center gap-[3vh] text-center">
-            <p className={`${BIG} sb-pop`}>{winner === 'tie' ? t("It's a tie!") : t('{team} wins!', { team: name(winner) })}</p>
+            <p className={`${BIG} sb-pop sb-rainbow-text`}>{winner === 'tie' ? t("It's a tie!") : t('{team} wins!', { team: name(winner) })}</p>
             <p className={`${NOTE} text-sb-muted`}>{t('Rungs climbed: {a} {ra}, {b} {rb}', { a: name(0), ra: rungs(state, 0), b: name(1), rb: rungs(state, 1) })}</p>
             <p className={`${NOTE} text-sb-muted`}>{t('Thanks for playing.')}</p>
           </div>
@@ -201,6 +209,7 @@ export function GameScreen() {
 
   return (
     <>
+      <div className="sb-rainbow-bar" aria-hidden />
       {view}
       <RemotePanel />
     </>

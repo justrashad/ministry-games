@@ -10,16 +10,38 @@ export const TEAMS: readonly TeamIndex[] = [0, 1];
 /** Stage names, translated where they are shown. */
 export const STAGE_NAMES = [msg('Newborn'), msg('Toddler'), msg('Child'), msg('Youth'), msg('Mature')] as const;
 
+/** Each help's rainbow color. */
+export const HELP_COLORS: Record<HelpName, string> = { lookup: 'var(--sb-box-5)', secondTry: 'var(--sb-box-3)', swap: 'var(--sb-box-8)' };
+
 export const HELP_NAMES: Record<HelpName, string> = {
   lookup: msg('Search the Scriptures'),
   secondTry: msg('Second Try'),
   swap: msg('Swap'),
 };
 
+/** Letters colored through the rainbow, one color per letter. */
+export function RainbowWord({ text }: { text: string }) {
+  let n = 0;
+  return (
+    <span>
+      {[...text].map((ch, i) => (
+        <span key={i} style={ch.trim() ? { color: `var(--sb-box-${n++ % 10})` } : undefined}>
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** The rainbow color for a question box on a board with `perStage` boxes per stage. */
+export function boxColor(stage: number, slot: number, perStage: number): string {
+  return `var(--sb-box-${(stage * perStage + slot) % 10})`;
+}
+
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-extrabold leading-[1.05] tracking-tight text-sb-text ${className}`}>
-      Are You Smarter Than a <span className="text-sb-accent">Spiritual Babe?</span>
+      Are You Smarter Than a <RainbowWord text="Spiritual Babe?" />
     </span>
   );
 }
@@ -40,8 +62,8 @@ export function Ladder({ state, team, active, size = 'md' }: { state: GameState;
         {Array.from({ length: height }, (_, i) => (
           <div
             key={i}
-            className={`flex items-center justify-center rounded-lg border-2 font-bold ${tv ? 'h-[3.2vh] text-[clamp(0.7rem,1vw,1.2rem)]' : 'h-5 text-xs'} ${i < climbed ? `sb-team-${team}` : 'bg-sb-panel text-sb-muted'}`}
-            style={{ borderColor: `var(--sb-team-${team})` }}
+            className={`flex items-center justify-center rounded-lg border-2 font-bold ${tv ? 'h-[3.2vh] text-[clamp(0.7rem,1vw,1.2rem)]' : 'h-5 text-xs'} ${i < climbed ? 'text-white' : 'bg-sb-panel text-sb-muted'}`}
+            style={i < climbed ? { backgroundColor: `var(--sb-box-${i % 10})`, borderColor: `var(--sb-box-${i % 10})` } : { borderColor: `var(--sb-team-${team})` }}
           >
             {i + 1}
           </div>
@@ -141,7 +163,8 @@ export function HelpChips({ state, team, size = 'md' }: { state: GameState; team
         return (
           <span
             key={help}
-            className={`rounded-full border-2 font-bold ${tv ? 'px-[0.8vw] py-[0.2vh] text-[clamp(0.7rem,1.1vw,1.3rem)]' : 'px-2.5 py-0.5 text-xs'} ${left ? 'border-sb-accent text-sb-accent' : 'border-sb-line text-sb-muted line-through'}`}
+            className={`rounded-full border-2 font-bold ${tv ? 'px-[0.8vw] py-[0.2vh] text-[clamp(0.7rem,1.1vw,1.3rem)]' : 'px-2.5 py-0.5 text-xs'} ${left ? 'text-white' : 'border-sb-line text-sb-muted line-through'}`}
+            style={left ? { backgroundColor: HELP_COLORS[help], borderColor: HELP_COLORS[help] } : undefined}
           >
             {t(HELP_NAMES[help])}
           </span>
