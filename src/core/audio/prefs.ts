@@ -6,11 +6,13 @@ import { music } from './music';
 export interface SoundPrefs {
   sfx: boolean;
   music: boolean;
+  /** The studio audience: applause, cheers and groans. */
+  crowd: boolean;
   /** 0 to 1. */
   volume: number;
 }
 
-export const DEFAULT_SOUND_PREFS: SoundPrefs = { sfx: true, music: true, volume: 0.85 };
+export const DEFAULT_SOUND_PREFS: SoundPrefs = { sfx: true, music: true, crowd: true, volume: 0.85 };
 
 export function sanitizeSoundPrefs(raw: unknown): SoundPrefs {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<SoundPrefs>;
@@ -18,6 +20,7 @@ export function sanitizeSoundPrefs(raw: unknown): SoundPrefs {
   return {
     sfx: typeof r.sfx === 'boolean' ? r.sfx : DEFAULT_SOUND_PREFS.sfx,
     music: typeof r.music === 'boolean' ? r.music : DEFAULT_SOUND_PREFS.music,
+    crowd: typeof r.crowd === 'boolean' ? r.crowd : DEFAULT_SOUND_PREFS.crowd,
     volume,
   };
 }

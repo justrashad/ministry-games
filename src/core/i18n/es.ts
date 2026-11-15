@@ -5,6 +5,8 @@ export const CORE_ES: Record<string, string> = {
   "Sound effects off": "Efectos de sonido desactivados",
   "Music on": "Música activada",
   "Music off": "Música desactivada",
+  "Studio audience on": "Público en el estudio activado",
+  "Studio audience off": "Público en el estudio desactivado",
   "From Eden to Egypt": "Del Edén a Egipto",
   "Genesis: creation, Noah, Abraham, Jacob and Joseph.": "Génesis: la creación, Noé, Abrahán, Jacob y José.",
   "Exodus to the Judges": "Del Éxodo a los Jueces",

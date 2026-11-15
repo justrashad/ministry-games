@@ -1,4 +1,4 @@
-import { Music, Volume2, VolumeX } from 'lucide-react';
+import { Music, Users, Volume2, VolumeX } from 'lucide-react';
 import { useT } from '../i18n/i18n';
 import { audio } from './engine';
 import { useSoundLeader, useSoundLocked } from './hooks';
@@ -53,6 +53,16 @@ export function SoundCorner({
         onClick={() => soundPrefs.set((p) => ({ ...p, music: !p.music }))}
       >
         <Music aria-hidden className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        className={`${buttonClass} ${prefs.crowd ? '' : 'opacity-50 line-through'}`}
+        aria-pressed={prefs.crowd}
+        aria-label={prefs.crowd ? t('Studio audience on') : t('Studio audience off')}
+        title={prefs.crowd ? t('Studio audience on') : t('Studio audience off')}
+        onClick={() => soundPrefs.set((p) => ({ ...p, crowd: !p.crowd }))}
+      >
+        <Users aria-hidden className="h-5 w-5" />
       </button>
     </div>
   );

@@ -1,4 +1,5 @@
 import { boom, chord, drum, hz, note, run, sparkle, whoosh } from '../../../core/audio/instruments';
+import { crowd } from '../../../core/audio/crowd';
 import { DRY, SFX, WET, type SoundKit } from '../../../core/audio/sfx';
 
 /* Spiritual Babe sounds: glockenspiel, marimba and claps, with a rising note for every rung climbed. */
@@ -15,6 +16,7 @@ export function rungNote(rung: number): string {
 
 export const KIT: SoundKit<BabeSound> & { climb: (t: number, rung: number) => void } = {
   start: (t) => {
+    crowd('applause', t + 0.45, 0.55);
     run('glock', WET, t, RAINBOW.slice(0, 8), 0.06, 0.25, 0.8);
     chord('bell', WET, t + 0.5, ['D5', 'F#5', 'A5', 'D6'], 1, 0.7);
     chord('pad', WET, t + 0.5, ['D4', 'A4', 'F#5'], 1.2, 0.8);
@@ -45,6 +47,7 @@ export const KIT: SoundKit<BabeSound> & { climb: (t: number, rung: number) => vo
     drum('clap', SFX, t + 0.2, 0.5);
   },
   climb: (t, rung) => {
+    crowd(rung >= 8 ? 'cheer' : 'applauseShort', t + 0.15, rung >= 8 ? 0.55 : 0.5);
     // The team's new rung rings out higher every time it climbs.
     run('marimba', SFX, t, ['D5', 'F#5', 'A5'], 0.05, 0.18, 0.8);
     note('bell', WET, t + 0.17, hz(rungNote(rung)), 0.8, 1);
@@ -53,18 +56,21 @@ export const KIT: SoundKit<BabeSound> & { climb: (t: number, rung: number) => vo
     sparkle(WET, t + 0.25, 3 + Math.min(8, rung), GLITTER, 0.5, 0.4);
   },
   wrong: (t) => {
+    crowd('aww', t + 0.1, 0.65);
     note('marimba', SFX, t, hz('F#4'), 0.25, 0.8);
     note('marimba', SFX, t + 0.15, hz('D4'), 0.25, 0.8);
     note('marimba', SFX, t + 0.3, hz('A3'), 0.5, 0.8);
     note('bass', SFX, t + 0.3, hz('A1'), 0.5, 0.6);
   },
   secondTry: (t) => {
+    crowd('ooh', t, 0.45);
     // Hopeful: a little rising harp figure and a held chord.
     run('glock', WET, t, ['A5', 'B5', 'D6', 'E6'], 0.08, 0.3, 0.9);
     run('marimba', SFX, t, ['A4', 'B4', 'D5', 'E5'], 0.08, 0.25, 0.8);
     chord('bell', WET, t + 0.34, ['E5', 'A5', 'C#6'], 0.8, 0.7);
   },
   bonus: (t) => {
+    crowd('ooh', t + 0.1, 0.55);
     for (let i = 0; i < 16; i++) drum(i % 4 === 3 ? 'tom' : 'snare', DRY, t + i * 0.045, 0.2 + i * 0.04);
     boom(SFX, t + 0.75, 0.9);
     chord('bell', WET, t + 0.75, ['D5', 'F#5', 'A5', 'D6'], 1.4, 0.8);
@@ -73,11 +79,13 @@ export const KIT: SoundKit<BabeSound> & { climb: (t: number, rung: number) => vo
     sparkle(WET, t + 0.8, 14, GLITTER, 1.2, 0.5);
   },
   bonusRight: (t) => {
+    crowd('cheer', t + 0.2, 0.65);
     run('glock', WET, t, RAINBOW, 0.04, 0.2, 0.75);
     chord('bell', WET, t + 0.45, ['D6', 'F#6', 'A6'], 1, 0.8);
     drum('crash', WET, t + 0.45, 0.7);
   },
   gameOver: (t) => {
+    crowd('bigCheer', t + 0.3, 0.75);
     [0, 0.07, 0.14, 0.21, 0.28].forEach((d) => drum('clap', SFX, t + d, 0.6));
     drum('crash', WET, t + 0.38, 0.9);
     sparkle(WET, t + 0.4, 22, GLITTER, 2, 0.5);
