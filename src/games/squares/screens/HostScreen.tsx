@@ -98,7 +98,7 @@ export function HostScreen() {
               <Check aria-hidden className="h-7 w-7" />
               {t('True')}
             </button>
-            <button type="button" className="ks-btn ks-btn-xl ks-btn-outline" onClick={() => dispatchGame({ type: 'ANSWER', team: state.turn, answer: false })}>
+            <button type="button" className="ks-btn ks-btn-xl ks-btn-red" onClick={() => dispatchGame({ type: 'ANSWER', team: state.turn, answer: false })}>
               <X aria-hidden className="h-7 w-7" />
               {t('False')}
             </button>

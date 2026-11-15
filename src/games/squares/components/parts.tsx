@@ -7,7 +7,7 @@ export const TEAMS: readonly TeamIndex[] = [0, 1];
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-extrabold leading-none tracking-tight text-ks-text ${className}`}>
-      Kingdom <span className="text-ks-accent">Squares</span>
+      <span className="text-ks-accent">Kingdom</span> <span className="text-ks-red">Squares</span>
     </span>
   );
 }

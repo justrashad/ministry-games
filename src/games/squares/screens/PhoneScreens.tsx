@@ -179,7 +179,7 @@ export function TeamPhoneScreen() {
         </button>
         <button
           type="button"
-          className={`flex items-center justify-center gap-3 rounded-[2rem] text-[clamp(2.2rem,12vw,5rem)] font-extrabold transition-transform active:scale-[0.98] ${live || sent === false ? 'border-4 border-ks-accent bg-ks-panel text-ks-accent' : 'bg-ks-sunk text-ks-muted'}`}
+          className={`flex items-center justify-center gap-3 rounded-[2rem] text-[clamp(2.2rem,12vw,5rem)] font-extrabold transition-transform active:scale-[0.98] ${live || sent === false ? 'ks-btn-red' : 'bg-ks-sunk text-ks-muted'}`}
           disabled={!live}
           onClick={() => call(false)}
         >

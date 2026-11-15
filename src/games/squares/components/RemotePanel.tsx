@@ -10,7 +10,7 @@ function QrCode({ text, label }: { text: string; label: string }) {
   useEffect(() => {
     let alive = true;
     import('qrcode')
-      .then((QR) => QR.toString(text, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#26301A', light: '#FFFFFF' } }))
+      .then((QR) => QR.toString(text, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#0F1B3D', light: '#FFFFFF' } }))
       .then((markup) => alive && setSvg(markup))
       .catch(() => alive && setSvg(null));
     return () => {

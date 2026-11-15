@@ -49,8 +49,8 @@ export const TITLES: Record<string, TitleInfo> = {
     description: 'A Bible true-or-false squares game for two teams, designed for family worship.',
     storagePrefix: 'kingdom-squares:',
     peerPrefix: 'kingdom-squares-v1-',
-    themeColor: '#4D6B1F',
-    backgroundColor: '#F6F3EA',
+    themeColor: '#1D4ED8',
+    backgroundColor: '#FFFFFF',
   },
 };
 

@@ -6,28 +6,32 @@
  * Kingdom Squares' colorway. Every color the game uses is one of these variables,
  * so a different colorway is a change to this block only.
  *
- * Option A, Olive Grove: warm parchment ground, olive green for main actions and
- * team 1, clay for team 2. Team 1 plays a ring and team 2 a diamond, so the teams
- * differ by shape as well as color.
+ * Blue and red on white: white ground, royal blue for main actions and team 1,
+ * red for team 2 and for False. Team 1 plays a ring and team 2 a diamond, so the
+ * teams differ by shape as well as color.
  */
 :root {
   color-scheme: light;
-  --ks-ground: #f6f3ea;
+  --ks-ground: #ffffff;
   --ks-panel: #ffffff;
-  --ks-sunk: #efeadc;
-  --ks-line: #dcd5c2;
-  --ks-soft: #e6ebd8;
-  --ks-soft-line: #bcc79d;
-  --ks-soft-text: #5c6b3a;
-  --ks-text: #26301a;
-  --ks-muted: #56623f;
-  --ks-accent: #4d6b1f;
-  --ks-accent-hover: #3f5918;
+  --ks-sunk: #f1f4fa;
+  --ks-line: #dde3ef;
+  --ks-soft: #eef3ff;
+  --ks-soft-line: #c3d2f3;
+  --ks-soft-text: #1e3a8a;
+  --ks-text: #0f1b3d;
+  --ks-muted: #4a5878;
+  --ks-accent: #1d4ed8;
+  --ks-accent-hover: #1e40af;
   --ks-on-accent: #ffffff;
-  --ks-alert: #9a3412;
-  --ks-team-0: #4d6b1f;
+  --ks-red: #dc2626;
+  --ks-red-hover: #b91c1c;
+  --ks-alert: #b91c1c;
+  --ks-card: #0f2a6b;
+  --ks-on-card: #ffffff;
+  --ks-team-0: #1d4ed8;
   --ks-on-team-0: #ffffff;
-  --ks-team-1: #b4532a;
+  --ks-team-1: #dc2626;
   --ks-on-team-1: #ffffff;
   --ks-radius: 16px;
   --ks-font: 'Lexend Variable', Lexend, system-ui, sans-serif;
@@ -88,6 +92,13 @@
     color: var(--ks-accent);
     background-color: transparent;
   }
+  .ks-btn-red {
+    background-color: var(--ks-red);
+    color: #ffffff;
+  }
+  .ks-btn-red:not(:disabled):hover {
+    background-color: var(--ks-red-hover);
+  }
   .ks-btn-danger {
     border: 2px solid var(--ks-alert);
     color: var(--ks-alert);
@@ -142,8 +153,8 @@
       0 0 0 9px var(--ks-accent);
   }
   .ks-card {
-    background-color: var(--ks-accent);
-    color: var(--ks-on-accent);
+    background-color: var(--ks-card);
+    color: var(--ks-on-card);
   }
 }
 

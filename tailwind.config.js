@@ -60,6 +60,7 @@ export default {
           accent: 'var(--ks-accent)',
           'on-accent': 'var(--ks-on-accent)',
           alert: 'var(--ks-alert)',
+          red: 'var(--ks-red)',
         },
       },
       fontFamily: {
