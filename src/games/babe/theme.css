@@ -6,9 +6,9 @@
  * The game's colorway, Rainbow. Every color the game uses is one of these
  * variables, so a different colorway is a change to this block only.
  *
- * White ground with the ten rainbow colors: one per question box, one per ladder
- * rung, one per help. Main buttons and the top stripe run the whole rainbow.
- * Team 1 is orange and team 2 is teal.
+ * White ground with the ten rainbow colors, always as solid blocks, never blended:
+ * one per question box, one per ladder rung, one per help, and a striped band of
+ * all ten across the top. Main buttons are solid blue. Team 1 is orange and team 2 teal.
  */
 :root {
   color-scheme: light;
@@ -44,7 +44,6 @@
   --sb-box-7: #4f46e5;
   --sb-box-8: #9333ea;
   --sb-box-9: #db2777;
-  --sb-rainbow: linear-gradient(90deg, #dc2626, #ea580c, #d97706, #16a34a, #0d9488, #0284c7, #2563eb, #4f46e5, #9333ea, #db2777);
   --sb-radius: 16px;
   --sb-font: 'Baloo 2 Variable', 'Baloo 2', system-ui, sans-serif;
 }
@@ -86,12 +85,11 @@
     transform: translateY(2px);
   }
   .sb-btn-primary {
-    background-image: var(--sb-rainbow);
+    background-color: var(--sb-box-6);
     color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   }
   .sb-btn-primary:not(:disabled):hover {
-    filter: brightness(0.92);
+    background-color: var(--sb-box-7);
   }
   .sb-btn-ghost {
     background-color: var(--sb-sunk);
@@ -205,23 +203,18 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-.sb-rainbow-bar {
+/* The striped band: ten solid blocks, one per rainbow color. */
+.sb-stripes {
+  display: flex;
+}
+.sb-stripes > span {
+  flex: 1 1 0;
+}
+.sb-stripes-top {
   position: fixed;
   inset: 0 0 auto 0;
   height: 8px;
-  background-image: var(--sb-rainbow);
   z-index: 30;
-}
-.sb-rainbow-card {
-  background-image: var(--sb-rainbow);
-  color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-.sb-rainbow-text {
-  background-image: var(--sb-rainbow);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 @keyframes sb-pop {

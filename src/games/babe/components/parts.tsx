@@ -33,6 +33,17 @@ export function RainbowWord({ text }: { text: string }) {
   );
 }
 
+/** Ten solid blocks, one per rainbow color. `top` pins it across the top of the screen. */
+export function RainbowStripes({ top = false, className = '' }: { top?: boolean; className?: string }) {
+  return (
+    <div className={`sb-stripes ${top ? 'sb-stripes-top' : ''} ${className}`} aria-hidden>
+      {Array.from({ length: 10 }, (_, i) => (
+        <span key={i} style={{ backgroundColor: `var(--sb-box-${i})` }} />
+      ))}
+    </div>
+  );
+}
+
 /** The rainbow color for a question box on a board with `perStage` boxes per stage. */
 export function boxColor(stage: number, slot: number, perStage: number): string {
   return `var(--sb-box-${(stage * perStage + slot) % 10})`;

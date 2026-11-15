@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { BookOpen } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
 import { RemotePanel } from '../components/RemotePanel';
-import { BoardView, boxColor, formatSeconds, HelpChips, Ladders, RainbowWord, STAGE_NAMES, TEAMS, useSecondsLeft, Wordmark } from '../components/parts';
+import { BoardView, boxColor, formatSeconds, HelpChips, Ladders, RainbowStripes, RainbowWord, STAGE_NAMES, TEAMS, useSecondsLeft, Wordmark } from '../components/parts';
 import { activeQuestion, gameWinner, rungs } from '../engine/game';
 import { useGameSounds, useKeyboardJudge, useUnlockSound } from '../hooks/useGameEffects';
 import { useGameState } from '../sync/gameStore';
@@ -31,13 +31,14 @@ function TeamBanner({ team, text }: { team: TeamIndex; text: string }) {
   return <p className={`sb-team-${team} sb-pop self-start rounded-2xl px-[2vw] py-[1vh] text-[clamp(1.1rem,2.3vw,2.7rem)] font-extrabold`}>{text}</p>;
 }
 
-/** The question card, in the color of the box it came from, or the whole rainbow for the bonus question. */
+/** The question card, in the color of the box it came from. The bonus question card is dark with the rainbow band across its top. */
 function Card({ label, color, children }: { label: string; color?: string; children: ReactNode }) {
   return (
     <section
-      className={`${color ? 'text-white' : 'sb-rainbow-card'} sb-pop flex min-h-0 flex-1 flex-col justify-center gap-[2.5vh] rounded-[1.4vw] px-[4vw] py-[3vh]`}
-      style={color ? { backgroundColor: color, textShadow: '0 2px 4px rgba(0, 0, 0, 0.25)' } : undefined}
+      className="sb-pop relative flex min-h-0 flex-1 flex-col justify-center gap-[2.5vh] overflow-hidden rounded-[1.4vw] px-[4vw] py-[3vh] text-white"
+      style={{ backgroundColor: color ?? 'var(--sb-text)' }}
     >
+      {!color && <RainbowStripes className="absolute inset-x-0 top-0 h-[1.6vh]" />}
       <p className="text-[clamp(0.9rem,1.6vw,1.9rem)] font-bold uppercase tracking-wider">{label}</p>
       {children}
     </section>
@@ -73,7 +74,7 @@ export function GameScreen() {
         <Wordmark className="text-[clamp(2.5rem,7vw,7rem)]" />
         <p className="text-2xl font-semibold text-sb-muted">{t('Waiting for the host to start a game.')}</p>
         <p className="max-w-xl text-lg text-sb-muted">{t('Keep this window on the TV. Start the game from the host controls on this computer, or connect a phone.')}</p>
-        <div className="sb-rainbow-bar" aria-hidden />
+        <RainbowStripes top />
         <RemotePanel />
       </main>
     );
@@ -197,7 +198,9 @@ export function GameScreen() {
       view = (
         <Frame state={state} middle={t('Game over')} active={winner === 'tie' ? null : winner}>
           <div className="flex flex-1 flex-col items-center justify-center gap-[3vh] text-center">
-            <p className={`${BIG} sb-pop sb-rainbow-text`}>{winner === 'tie' ? t("It's a tie!") : t('{team} wins!', { team: name(winner) })}</p>
+            <p className={`${BIG} sb-pop`}>
+              <RainbowWord text={winner === 'tie' ? t("It's a tie!") : t('{team} wins!', { team: name(winner) })} />
+            </p>
             <p className={`${NOTE} text-sb-muted`}>{t('Rungs climbed: {a} {ra}, {b} {rb}', { a: name(0), ra: rungs(state, 0), b: name(1), rb: rungs(state, 1) })}</p>
             <p className={`${NOTE} text-sb-muted`}>{t('Thanks for playing.')}</p>
           </div>
@@ -209,7 +212,7 @@ export function GameScreen() {
 
   return (
     <>
-      <div className="sb-rainbow-bar" aria-hidden />
+      <RainbowStripes top />
       {view}
       <RemotePanel />
     </>
