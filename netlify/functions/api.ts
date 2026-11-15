@@ -1,4 +1,5 @@
 import { lemonSqueezyClient, route, type Route } from '../../server/licensing';
+import { SHOWDOWN_TITLE } from '../../server/showdownTitle';
 
 const ROUTES: Record<string, Route> = {
   '/api/activate': 'activate',
@@ -33,7 +34,7 @@ export default async (req: Request): Promise<Response> => {
     }
   }
   const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
-  const result = await route(name, body, env, lemonSqueezyClient());
+  const result = await route(name, body, env, lemonSqueezyClient(), SHOWDOWN_TITLE);
   // Never expose configuration details to visitors; they are logged for the owner instead.
   if (result.body.configError) {
     console.error('Store configuration error:', result.body.configError);

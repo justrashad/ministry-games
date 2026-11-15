@@ -4,7 +4,11 @@ import { QUESTION_PACKS_ES } from './packsEs';
 import { validateQuestion } from '../src/engine/validation';
 import { matchAnswer } from '../src/engine/matching';
 import { questionKind } from '../src/engine/questionPicker';
-import { route, signToken } from './licensing';
+import { route as routeFor, signToken, type ProviderClient, type Route } from './licensing';
+import { SHOWDOWN_TITLE } from './showdownTitle';
+
+const route = (name: Route, body: Record<string, unknown>, env: Record<string, string | undefined>, provider: ProviderClient) =>
+  routeFor(name, body, env, provider, SHOWDOWN_TITLE);
 
 describe('Spanish packs', () => {
   const ids = Object.keys(QUESTION_PACKS_ES);

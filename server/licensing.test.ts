@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { QUESTION_PACKS } from './packs';
-import { lemonSqueezyClient, parseConfig, route, signToken, verifyToken, type ProviderClient, type ProviderLicense } from './licensing';
+import {
+  lemonSqueezyClient,
+  parseConfig as parseConfigFor,
+  route as routeFor,
+  signToken,
+  verifyToken,
+  type ProviderClient,
+  type ProviderLicense,
+  type Route,
+  type TitleContent,
+} from './licensing';
+import { SHOWDOWN_TITLE } from './showdownTitle';
+
+type Env = Record<string, string | undefined>;
+const parseConfig = (env: Env) => parseConfigFor(env, SHOWDOWN_TITLE);
+const route = (name: Route, body: Record<string, unknown>, env: Env, provider: ProviderClient) => routeFor(name, body, env, provider, SHOWDOWN_TITLE);
 
 const SECRET = 'x'.repeat(40);
 const ENV = {
@@ -258,5 +273,67 @@ describe('launch promo', () => {
     const bad = (await route('catalog', {}, { ...ENV, PROMO: '{"code":"x","percent":250}' }, provider));
     expect(bad.status).toBe(200);
     expect(bad.body.promo).toBeNull();
+  });
+});
+
+describe('titles', () => {
+  // A second title sharing the same store and signing secret, with its own product ids.
+  const OTHER: TitleContent = {
+    id: 'theopardy',
+    name: 'Theopardy!',
+    packs: [{ id: 'kings', name: 'Kings', description: 'Kings of Israel and Judah', released: '2026-01-01', questions: [{ id: 'k1' }] }],
+    spanishPacks: {},
+    messages: { notOpen: 'The Theopardy! store is not open yet.', wrongProduct: "That key isn't for Theopardy!.", deviceName: 'Theopardy! device' },
+  };
+  const OTHER_ENV = {
+    LS_STORE_ID: '777',
+    LICENSE_SIGNING_SECRET: SECRET,
+    LS_CATALOG: JSON.stringify({
+      game: { productId: 500, checkoutUrl: 'https://shop.example/theopardy' },
+      kings: { productId: 501, checkoutUrl: 'https://shop.example/kings' },
+    }),
+  };
+
+  it('stamps tokens with the title that issued them', async () => {
+    const { provider } = fakeProvider();
+    const token = (await route('activate', { key: KEY }, ENV, provider)).body.token;
+    expect((await verifyToken(token, SECRET))?.t).toBe('showdown');
+    const other = fakeProvider({ productId: 500 });
+    const otherToken = (await routeFor('activate', { key: KEY }, OTHER_ENV, other.provider, OTHER)).body.token;
+    expect((await verifyToken(otherToken, SECRET))?.t).toBe('theopardy');
+  });
+
+  it("refuses one title's key and token on another title", async () => {
+    const { provider, calls } = fakeProvider();
+    // A Ministry Showdown key (product 100) entered on the other title's site.
+    const wrongKey = await routeFor('activate', { key: KEY }, OTHER_ENV, provider, OTHER);
+    expect(wrongKey.status).toBe(400);
+    expect(wrongKey.body.error).toBe("That key isn't for Theopardy!.");
+    expect(calls).toContain('deactivate');
+
+    // A Ministry Showdown token copied onto the other title's site.
+    const token = (await route('activate', { key: KEY }, ENV, provider)).body.token;
+    const validate = await routeFor('validate', { token }, OTHER_ENV, provider, OTHER);
+    expect(validate.status).toBe(403);
+    expect(validate.body.revoked).toBe(true);
+    expect((await routeFor('pack', { token, packId: 'kings' }, OTHER_ENV, provider, OTHER)).status).toBe(403);
+    expect((await routeFor('deactivate', { token }, OTHER_ENV, provider, OTHER)).status).toBe(403);
+    // It still works where it was issued.
+    expect((await route('validate', { token }, ENV, provider)).body.ok).toBe(true);
+  });
+
+  it('treats tokens issued before titles existed as Ministry Showdown tokens', async () => {
+    const { provider } = fakeProvider();
+    const legacy = await signToken({ v: 1, ent: 'game', key: KEY, iid: 'inst-1', iat: 1 }, SECRET);
+    expect((await route('validate', { token: legacy }, ENV, provider)).body.ok).toBe(true);
+    expect((await routeFor('validate', { token: legacy }, OTHER_ENV, provider, OTHER)).status).toBe(403);
+  });
+
+  it("serves only the running title's packs and wording", async () => {
+    const other = fakeProvider({ productId: 501 });
+    const res = await routeFor('activate', { key: KEY }, OTHER_ENV, other.provider, OTHER);
+    expect((res.body.pack as { id: string }).id).toBe('kings');
+    expect(parseConfigFor({ ...OTHER_ENV, LS_CATALOG: JSON.stringify({ game: { productId: 500, checkoutUrl: 'https://x' }, 'bible-characters': { productId: 9, checkoutUrl: 'https://x' } }) }, OTHER).ok).toBe(false);
+    expect((await routeFor('catalog', {}, {}, other.provider, OTHER)).body.error).toBe('The Theopardy! store is not open yet.');
   });
 });

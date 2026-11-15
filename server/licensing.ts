@@ -1,10 +1,9 @@
-import type { Question } from '../src/types';
-import { findPack, QUESTION_PACKS } from './packs';
-import { QUESTION_PACKS_ES } from './packsEs';
 import { msg } from '../src/i18n/msg';
 
 /*
- * License checks for Ministry Showdown, independent of the hosting platform.
+ * License checks shared by every title, independent of the hosting platform.
+ * Each title's site runs this with its own TitleContent (name, packs, wording)
+ * and its own environment, so a key or token for one title is refused by another.
  * The payment provider (Lemon Squeezy) is isolated in `ProviderClient` so it can be
  * swapped (for example to Stripe Managed Payments) without touching the rest.
  *
@@ -23,6 +22,47 @@ import { msg } from '../src/i18n/msg';
 
 export type Entitlement = string; // 'game' or a pack id
 
+/** A paid question pack as the server stores it. Q is the title's question shape. */
+export interface PackDef<Q = unknown> {
+  id: string;
+  name: string;
+  description: string;
+  /** Release day (YYYY-MM-DD). Bundles include the packs released on or before the day they were bought. */
+  released: string;
+  questions: Q[];
+}
+
+export interface TranslatedPack<Q = unknown> {
+  name: string;
+  description: string;
+  questions: Q[];
+}
+
+/** Everything the license server needs to know about the title it is serving. */
+export interface TitleContent<Q = unknown> {
+  /** Short id written into every license token, so one title's token can't be used on another. */
+  id: string;
+  name: string;
+  packs: PackDef<Q>[];
+  /** Spanish versions keyed by pack id. A pack that isn't here is served in English. */
+  spanishPacks: Record<string, TranslatedPack<Q>>;
+  messages: {
+    /** Shown while the store has no products yet. */
+    notOpen: string;
+    /** Shown when a valid key belongs to some other product. */
+    wrongProduct: string;
+    /** Name given to a device that didn't send one. */
+    deviceName: string;
+  };
+}
+
+/** Tokens issued before titles existed carry no title id; they all belong to this one. */
+export const LEGACY_TITLE_ID = 'showdown';
+
+export function findPack<Q>(title: TitleContent<Q>, id: string): PackDef<Q> | undefined {
+  return title.packs.find((p) => p.id === id);
+}
+
 export interface CatalogEntry {
   entitlement: Entitlement;
   productId: number;
@@ -31,6 +71,7 @@ export interface CatalogEntry {
 }
 
 export interface ServerConfig {
+  title: TitleContent;
   /** null until Lemon Squeezy is connected; the owner key still works. */
   storeId: number | null;
   catalog: CatalogEntry[];
@@ -73,7 +114,7 @@ export function storeOpen(config: ServerConfig): boolean {
 
 export type ConfigResult = { ok: true; config: ServerConfig } | { ok: false; error: string };
 
-export function parseConfig(env: Record<string, string | undefined>): ConfigResult {
+export function parseConfig(env: Record<string, string | undefined>, title: TitleContent): ConfigResult {
   const secret = env.LICENSE_SIGNING_SECRET ?? '';
   if (secret.length < 32) return { ok: false, error: 'LICENSE_SIGNING_SECRET must be at least 32 characters.' };
   const ownerRaw = (env.OWNER_KEY ?? '').trim();
@@ -82,7 +123,7 @@ export function parseConfig(env: Record<string, string | undefined>): ConfigResu
 
   // The Lemon Squeezy half is optional so the owner key works before the store exists.
   const hasStore = !!(env.LS_STORE_ID || env.LS_CATALOG);
-  if (!hasStore) return { ok: true, config: { storeId: null, catalog: [], secret, ownerKey, promo: parsePromo(env.PROMO) } };
+  if (!hasStore) return { ok: true, config: { title, storeId: null, catalog: [], secret, ownerKey, promo: parsePromo(env.PROMO) } };
 
   const storeId = Number(env.LS_STORE_ID);
   if (!Number.isInteger(storeId) || storeId <= 0) return { ok: false, error: 'LS_STORE_ID is missing or not a number.' };
@@ -95,7 +136,7 @@ export function parseConfig(env: Record<string, string | undefined>): ConfigResu
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false, error: 'LS_CATALOG must be a JSON object.' };
   const catalog: CatalogEntry[] = [];
   for (const [entitlement, value] of Object.entries(raw as Record<string, unknown>)) {
-    if (entitlement !== 'game' && !BUNDLES.has(entitlement) && !findPack(entitlement)) return { ok: false, error: `LS_CATALOG has an unknown entry "${entitlement}".` };
+    if (entitlement !== 'game' && !BUNDLES.has(entitlement) && !findPack(title, entitlement)) return { ok: false, error: `LS_CATALOG has an unknown entry "${entitlement}".` };
     const v = value as { productId?: unknown; checkoutUrl?: unknown; price?: unknown };
     const productId = Number(v?.productId);
     if (!Number.isInteger(productId) || productId <= 0) return { ok: false, error: `LS_CATALOG "${entitlement}" needs a numeric productId.` };
@@ -103,7 +144,7 @@ export function parseConfig(env: Record<string, string | undefined>): ConfigResu
     catalog.push({ entitlement, productId, checkoutUrl: v.checkoutUrl, price: typeof v.price === 'string' ? v.price : null });
   }
   if (!catalog.some((c) => c.entitlement === 'game')) return { ok: false, error: 'LS_CATALOG needs a "game" entry.' };
-  return { ok: true, config: { storeId, catalog, secret, ownerKey, promo: parsePromo(env.PROMO) } };
+  return { ok: true, config: { title, storeId, catalog, secret, ownerKey, promo: parsePromo(env.PROMO) } };
 }
 
 /* ------------------------------ tokens --------------------------------- */
@@ -114,6 +155,8 @@ export interface TokenPayload {
   key: string;
   iid: string;
   iat: number;
+  /** Id of the title that issued the token. Missing on tokens issued before titles existed. */
+  t?: string;
   /** Purchase time (ms) for Mega Pack / Complete Edition keys: they cover packs released up to that day. */
   pd?: number;
 }
@@ -241,7 +284,7 @@ export interface PackPayload {
   id: string;
   name: string;
   description: string;
-  questions: Question[];
+  questions: unknown[];
   /** The language actually delivered: Spanish when a Spanish version exists, otherwise English. */
   lang: PackLang;
 }
@@ -256,15 +299,15 @@ export type ApiResult = { status: number; body: Record<string, unknown> };
 
 const fail = (status: number, error: string, extra: Record<string, unknown> = {}): ApiResult => ({ status, body: { ok: false, error, ...extra } });
 
-function allPackPayloads(lang: PackLang, purchasedAt?: number): PackPayload[] {
-  return coveredPacks(purchasedAt).map((p) => packPayload(p.id, lang)!);
+function allPackPayloads(title: TitleContent, lang: PackLang, purchasedAt?: number): PackPayload[] {
+  return coveredPacks(title, purchasedAt).map((p) => packPayload(title, p.id, lang)!);
 }
 
 /** Packs a bundle bought at `purchasedAt` includes; no date (the owner key) means every pack. */
-export function coveredPacks(purchasedAt?: number): typeof QUESTION_PACKS {
-  if (purchasedAt === undefined) return QUESTION_PACKS;
+export function coveredPacks<Q>(title: TitleContent<Q>, purchasedAt?: number): PackDef<Q>[] {
+  if (purchasedAt === undefined) return title.packs;
   const day = new Date(purchasedAt).toISOString().slice(0, 10);
-  return QUESTION_PACKS.filter((p) => p.released <= day);
+  return title.packs.filter((p) => p.released <= day);
 }
 
 const NOT_INCLUDED = msg("That pack came out after your purchase, so it isn't included. You can buy it on its own in the Store.");
@@ -276,12 +319,15 @@ function isOwnerKey(key: string, config: ServerConfig): boolean {
   return constantTimeEqual(a, b);
 }
 
-const NOT_OPEN = msg('The Ministry Showdown store is not open yet.');
+/** True when the token was issued by the title this server is running. */
+function ownToken(payload: TokenPayload, config: ServerConfig): boolean {
+  return (payload.t ?? LEGACY_TITLE_ID) === config.title.id;
+}
 
-function packPayload(ent: Entitlement, lang: PackLang = 'en'): PackPayload | null {
-  const pack = findPack(ent);
+function packPayload(title: TitleContent, ent: Entitlement, lang: PackLang = 'en'): PackPayload | null {
+  const pack = findPack(title, ent);
   if (!pack) return null;
-  const es = lang === 'es' ? QUESTION_PACKS_ES[pack.id] : undefined;
+  const es = lang === 'es' ? title.spanishPacks[pack.id] : undefined;
   if (es) return { id: pack.id, name: es.name, description: es.description, questions: es.questions, lang: 'es' };
   return { id: pack.id, name: pack.name, description: pack.description, questions: pack.questions, lang: 'en' };
 }
@@ -300,26 +346,27 @@ export function friendlyProviderError(error: string | null): string {
 const KEY_PATTERN = /^[A-Za-z0-9-]{10,100}$/;
 const BAD_STATUSES = new Set(['disabled', 'expired']);
 
-function cleanDeviceName(raw: unknown): string {
+function cleanDeviceName(raw: unknown, fallback: string): string {
   const text = typeof raw === 'string' ? raw.replace(/[^\w\s().,/-]/g, '').trim().slice(0, 60) : '';
-  return text || 'Ministry Showdown device';
+  return text || fallback;
 }
 
 export async function handleActivate(body: Record<string, unknown>, config: ServerConfig, provider: ProviderClient): Promise<ApiResult> {
+  const { title } = config;
   const key = typeof body.key === 'string' ? body.key.trim() : '';
   if (!KEY_PATTERN.test(key)) return fail(400, msg("That doesn't look like a license key. Copy it from your purchase email and try again."));
   if (isOwnerKey(key, config)) {
-    const token = await signToken({ v: 1, ent: OWNER, key, iid: OWNER, iat: Date.now() }, config.secret);
-    return { status: 200, body: { ok: true, entitlement: OWNER, token, keyHint: 'OWNR', customerName: null, pack: null, packs: allPackPayloads(requestedLang(body)) } };
+    const token = await signToken({ v: 1, ent: OWNER, key, iid: OWNER, iat: Date.now(), t: title.id }, config.secret);
+    return { status: 200, body: { ok: true, entitlement: OWNER, token, keyHint: 'OWNR', customerName: null, pack: null, packs: allPackPayloads(title, requestedLang(body)) } };
   }
-  if (!storeOpen(config)) return fail(503, NOT_OPEN);
-  const result = await provider.activate(key, cleanDeviceName(body.deviceName));
+  if (!storeOpen(config)) return fail(503, title.messages.notOpen);
+  const result = await provider.activate(key, cleanDeviceName(body.deviceName, title.messages.deviceName));
   if (!result.ok) return fail(400, friendlyProviderError(result.error), { reason: 'provider' });
   const entry = result.storeId === config.storeId ? config.catalog.find((c) => c.productId === result.productId) : undefined;
   if (!entry || !result.instanceId) {
     // A valid key from some other product: give the activation back so the owner loses nothing.
     if (result.instanceId && result.storeId === config.storeId) await provider.deactivate(key, result.instanceId).catch(() => undefined);
-    return fail(400, msg("That key isn't for Ministry Showdown. Check the email for your Ministry Showdown purchase."));
+    return fail(400, title.messages.wrongProduct);
   }
   if (result.status && BAD_STATUSES.has(result.status)) {
     await provider.deactivate(key, result.instanceId).catch(() => undefined);
@@ -327,7 +374,7 @@ export async function handleActivate(body: Record<string, unknown>, config: Serv
   }
   const isBundle = BUNDLES.has(entry.entitlement);
   const purchasedAt = isBundle ? (result.purchasedAt ?? Date.now()) : undefined;
-  const token = await signToken({ v: 1, ent: entry.entitlement, key, iid: result.instanceId, iat: Date.now(), ...(isBundle ? { pd: purchasedAt } : {}) }, config.secret);
+  const token = await signToken({ v: 1, ent: entry.entitlement, key, iid: result.instanceId, iat: Date.now(), t: title.id, ...(isBundle ? { pd: purchasedAt } : {}) }, config.secret);
   return {
     status: 200,
     body: {
@@ -336,9 +383,9 @@ export async function handleActivate(body: Record<string, unknown>, config: Serv
       token,
       keyHint: key.slice(-4).toUpperCase(),
       customerName: result.customerName,
-      pack: entry.entitlement === 'game' || isBundle ? null : packPayload(entry.entitlement, requestedLang(body)),
-      packs: isBundle ? allPackPayloads(requestedLang(body), purchasedAt) : null,
-      packIds: isBundle ? coveredPacks(purchasedAt).map((p) => p.id) : null,
+      pack: entry.entitlement === 'game' || isBundle ? null : packPayload(title, entry.entitlement, requestedLang(body)),
+      packs: isBundle ? allPackPayloads(title, requestedLang(body), purchasedAt) : null,
+      packIds: isBundle ? coveredPacks(title, purchasedAt).map((p) => p.id) : null,
     },
   };
 }
@@ -346,23 +393,25 @@ export async function handleActivate(body: Record<string, unknown>, config: Serv
 export async function handleValidate(body: Record<string, unknown>, config: ServerConfig, provider: ProviderClient): Promise<ApiResult> {
   const payload = await verifyToken(body.token, config.secret);
   if (!payload) return fail(401, msg('This license record is damaged. Enter your key again.'), { revoked: true });
+  if (!ownToken(payload, config)) return fail(403, config.title.messages.wrongProduct, { revoked: true });
   if (payload.ent === OWNER) {
     return isOwnerKey(payload.key, config) ? { status: 200, body: { ok: true, entitlement: OWNER } } : fail(403, msg('The owner key has changed.'), { revoked: true });
   }
-  if (!storeOpen(config)) return fail(503, NOT_OPEN, { retry: true });
+  if (!storeOpen(config)) return fail(503, config.title.messages.notOpen, { retry: true });
   const result = await provider.validate(payload.key, payload.iid);
   const stillOurs = result.storeId === null || result.storeId === config.storeId;
   if (!result.ok || !stillOurs || (result.status && BAD_STATUSES.has(result.status))) {
     return fail(403, result.error ?? 'This license is no longer active.', { revoked: true });
   }
-  return { status: 200, body: { ok: true, entitlement: payload.ent, ...(BUNDLES.has(payload.ent) ? { packIds: coveredPacks(payload.pd ?? payload.iat).map((p) => p.id) } : {}) } };
+  return { status: 200, body: { ok: true, entitlement: payload.ent, ...(BUNDLES.has(payload.ent) ? { packIds: coveredPacks(config.title, payload.pd ?? payload.iat).map((p) => p.id) } : {}) } };
 }
 
 export async function handleDeactivate(body: Record<string, unknown>, config: ServerConfig, provider: ProviderClient): Promise<ApiResult> {
   const payload = await verifyToken(body.token, config.secret);
   if (!payload) return fail(401, msg('This license record is damaged.'));
+  if (!ownToken(payload, config)) return fail(403, config.title.messages.wrongProduct);
   if (payload.ent === OWNER) return { status: 200, body: { ok: true } };
-  if (!storeOpen(config)) return fail(503, NOT_OPEN, { retry: true });
+  if (!storeOpen(config)) return fail(503, config.title.messages.notOpen, { retry: true });
   const result = await provider.deactivate(payload.key, payload.iid);
   // An instance that no longer exists counts as removed.
   if (!result.ok && result.error && !/not found|invalid/i.test(result.error)) return fail(400, result.error);
@@ -372,25 +421,27 @@ export async function handleDeactivate(body: Record<string, unknown>, config: Se
 export async function handlePack(body: Record<string, unknown>, config: ServerConfig, provider: ProviderClient): Promise<ApiResult> {
   const payload = await verifyToken(body.token, config.secret);
   if (!payload) return fail(401, msg('This license record is damaged. Enter your key again.'), { revoked: true });
+  const { title } = config;
+  if (!ownToken(payload, config)) return fail(403, title.messages.wrongProduct, { revoked: true });
   if (payload.ent === OWNER) {
     if (!isOwnerKey(payload.key, config)) return fail(403, msg('The owner key has changed.'), { revoked: true });
-    const ownerPack = typeof body.packId === 'string' ? packPayload(body.packId, requestedLang(body)) : null;
+    const ownerPack = typeof body.packId === 'string' ? packPayload(title, body.packId, requestedLang(body)) : null;
     return ownerPack ? { status: 200, body: { ok: true, pack: ownerPack } } : fail(400, msg('Unknown question pack.'));
   }
   const lang = requestedLang(body);
-  if (BUNDLES.has(payload.ent) && typeof body.packId === 'string' && findPack(body.packId) && !coveredPacks(payload.pd ?? payload.iat).some((p) => p.id === body.packId)) {
+  if (BUNDLES.has(payload.ent) && typeof body.packId === 'string' && findPack(title, body.packId) && !coveredPacks(title, payload.pd ?? payload.iat).some((p) => p.id === body.packId)) {
     return fail(403, NOT_INCLUDED, { notIncluded: true });
   }
-  const pack = BUNDLES.has(payload.ent) ? (typeof body.packId === 'string' ? packPayload(body.packId, lang) : null) : packPayload(payload.ent, lang);
+  const pack = BUNDLES.has(payload.ent) ? (typeof body.packId === 'string' ? packPayload(title, body.packId, lang) : null) : packPayload(title, payload.ent, lang);
   if (!pack) return fail(400, BUNDLES.has(payload.ent) ? 'Unknown question pack.' : 'That license is not for a question pack.');
-  if (!storeOpen(config)) return fail(503, NOT_OPEN, { retry: true });
+  if (!storeOpen(config)) return fail(503, config.title.messages.notOpen, { retry: true });
   const result = await provider.validate(payload.key, payload.iid);
   if (!result.ok || (result.status && BAD_STATUSES.has(result.status))) return fail(403, result.error ?? 'This license is no longer active.', { revoked: true });
   return { status: 200, body: { ok: true, pack } };
 }
 
 export function handleCatalog(config: ServerConfig, now = Date.now()): ApiResult {
-  if (!storeOpen(config)) return fail(503, NOT_OPEN);
+  if (!storeOpen(config)) return fail(503, config.title.messages.notOpen);
   return {
     status: 200,
     body: {
@@ -404,9 +455,15 @@ export function handleCatalog(config: ServerConfig, now = Date.now()): ApiResult
 export type Route = 'activate' | 'validate' | 'deactivate' | 'pack' | 'catalog';
 
 /** Single entry point used by the Netlify Function (and by tests). */
-export async function route(name: Route, body: Record<string, unknown>, env: Record<string, string | undefined>, provider: ProviderClient): Promise<ApiResult> {
-  const parsed = parseConfig(env);
-  if (!parsed.ok) return fail(503, NOT_OPEN, { configError: parsed.error });
+export async function route(
+  name: Route,
+  body: Record<string, unknown>,
+  env: Record<string, string | undefined>,
+  provider: ProviderClient,
+  title: TitleContent,
+): Promise<ApiResult> {
+  const parsed = parseConfig(env, title);
+  if (!parsed.ok) return fail(503, title.messages.notOpen, { configError: parsed.error });
   try {
     switch (name) {
       case 'catalog':
