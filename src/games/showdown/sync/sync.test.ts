@@ -3,7 +3,7 @@ import { createCodec, isNewer, mergeEnvelope, type GameEnvelope } from '../../..
 import { showdownDefinition } from '../engine/syncDefinition';
 import type { GameState } from '../types';
 import { formatRoomCode, generateRoomCode, isValidRoomCode, normalizeRoomCode, peerIdForRoom, ROOM_ALPHABET } from '../../../core/sync/roomCode';
-import { mulberry32 } from '../engine/random';
+import { mulberry32 } from '../../../core/lib/random';
 import { startGame, makeQuestion } from '../engine/testUtils';
 
 const game = startGame([makeQuestion('q1', [10, 5])]);

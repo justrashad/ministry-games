@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { orderQuestions, pickNextQuestion } from './questionPicker';
-import { mulberry32 } from './random';
+import { mulberry32 } from '../../../core/lib/random';
 import { makeQuestion } from './testUtils';
 
 const qs = Array.from({ length: 10 }, (_, i) => makeQuestion(`q${i}`, [10]));

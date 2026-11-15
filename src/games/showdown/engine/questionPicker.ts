@@ -1,5 +1,5 @@
 import type { Question } from '../types';
-import { shuffle } from './random';
+import { shuffle } from '../../../core/lib/random';
 
 export type QuestionOrder = 'inOrder' | 'shuffle';
 

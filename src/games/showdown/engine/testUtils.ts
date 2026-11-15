@@ -2,7 +2,7 @@ import type { GameState, Question, QuestionSet, Settings } from '../types';
 import { DEFAULT_SETTINGS, sanitizeSettings } from './defaults';
 import { createGame } from './createGame';
 import { reduceGame, type GameAction } from './game';
-import { mulberry32 } from './random';
+import { mulberry32 } from '../../../core/lib/random';
 
 export function makeQuestion(id: string, points: number[], extra: Partial<Question> = {}): Question {
   return {
