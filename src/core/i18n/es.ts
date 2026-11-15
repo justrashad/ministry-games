@@ -1,5 +1,13 @@
 /* Spanish (neutral Latin American) for the text shared by every title. Keys are the English text; see i18n.ts. */
 export const CORE_ES: Record<string, string> = {
+  "From Eden to Egypt": "Del Edén a Egipto",
+  "Genesis: creation, Noah, Abraham, Jacob and Joseph.": "Génesis: la creación, Noé, Abrahán, Jacob y José.",
+  "Exodus to the Judges": "Del Éxodo a los Jueces",
+  "Moses, the wilderness, Joshua, the judges and Ruth.": "Moisés, el desierto, Josué, los jueces y Rut.",
+  "Kings and Prophets": "Reyes y profetas",
+  "Samuel, David, Solomon, Elijah, Esther, Daniel and more.": "Samuel, David, Salomón, Elías, Ester, Daniel y más.",
+  "Jesus and the Early Christians": "Jesús y los primeros cristianos",
+  "The life of Jesus, the apostles and the congregation in Acts.": "La vida de Jesús, los apóstoles y la congregación en Hechos.",
   "Couldn't reach the store. Check your connection and try again.": "No se pudo conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.",
   "Paste the license key from your purchase email.": "Pega la clave de licencia del correo de tu compra.",
   "The store sent an unexpected reply. Try again in a minute.": "La tienda envió una respuesta inesperada. Inténtalo de nuevo en un minuto.",
@@ -26,6 +34,7 @@ export const CORE_ES: Record<string, string> = {
   "This browser can't act as a remote. Try Chrome or Safari.": "Este navegador no puede funcionar como control. Prueba con Chrome o Safari.",
   "This browser can't connect to phones. Try Chrome, Edge, Safari or Firefox.": "Este navegador no puede conectarse con teléfonos. Prueba con Chrome, Edge, Safari o Firefox.",
   "This key is already active on the maximum number of devices. On a device you no longer use, open Store and choose \"Remove from this device\", then try again.": "Esta clave ya está activa en el número máximo de dispositivos. En un dispositivo que ya no uses, abre la Tienda y elige \"Quitar de este dispositivo\", y luego inténtalo de nuevo.",
+  "This pack is not activated on this device.": "Este paquete no está activado en este dispositivo.",
   "This license record is damaged.": "Este registro de licencia está dañado.",
   "This license record is damaged. Enter your key again.": "Este registro de licencia está dañado. Ingresa tu clave de nuevo.",
   "Trying to reach the connection service. Check the internet connection.": "Intentando conectar con el servicio de conexión. Revisa tu conexión a internet.",

@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Check, KeyRound, ShoppingCart } from 'lucide-react';
 import { withDiscount, type StoreProduct, type StorePromo } from '../../../core/commerce/licenseClient';
-import { useT } from '../../../core/i18n/i18n';
-import { grantName, license } from '../commerce/license';
+import { packRows } from '../../../core/commerce/packChoices';
+import { useLang, useT } from '../../../core/i18n/i18n';
+import { PACK_CATALOG } from '../commerce/catalog';
+import { grantName, license, packLibrary } from '../commerce/license';
 import { getHashParam, navigate } from '../lib/router';
 
-function useStoreInfo(): { product: StoreProduct | null; promo: StorePromo | null; loaded: boolean } {
-  const [info, setInfo] = useState<{ product: StoreProduct | null; promo: StorePromo | null; loaded: boolean }>({ product: null, promo: null, loaded: false });
+function useStoreInfo(): { product: StoreProduct | null; products: StoreProduct[]; promo: StorePromo | null; loaded: boolean } {
+  const [info, setInfo] = useState<{ product: StoreProduct | null; products: StoreProduct[]; promo: StorePromo | null; loaded: boolean }>({ product: null, products: [], promo: null, loaded: false });
   useEffect(() => {
     let alive = true;
     void Promise.all([license.loadStoreCatalog(), license.loadPromo()]).then(([products, promo]) => {
-      if (alive) setInfo({ product: products?.find((p) => p.entitlement === 'game') ?? null, promo, loaded: true });
+      if (alive) setInfo({ product: products?.find((p) => p.entitlement === 'game') ?? null, products: products ?? [], promo, loaded: true });
     });
     return () => {
       alive = false;
@@ -23,7 +25,10 @@ export function StoreScreen() {
   const t = useT();
   const licenses = license.useLicenses();
   const unlocked = licenses.game !== null;
-  const { product, promo, loaded } = useStoreInfo();
+  const { product, products, promo, loaded } = useStoreInfo();
+  const lang = useLang();
+  const installed = packLibrary.usePacksIn(lang);
+  const rows = packRows(PACK_CATALOG, installed, license);
   const [key, setKey] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +114,37 @@ export function StoreScreen() {
           </div>
         </div>
       )}
+
+      <section className="tp-panel">
+        <h2 className="text-2xl">{t('Question packs')}</h2>
+        <p className="mt-1 tp-muted">{t('Each pack adds a new set of categories and clues, in English and Spanish.')}</p>
+        <ul className="mt-4 flex flex-col gap-3">
+          {rows.map((row) => {
+            const buy = products.find((p) => p.entitlement === row.info.id) ?? null;
+            return (
+              <li key={row.info.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-sea-900 p-3">
+                <div className="max-w-xl">
+                  <p className="text-lg font-bold">{t(row.info.name)}</p>
+                  <p className="tp-muted">{t(row.info.description)}</p>
+                </div>
+                {row.state !== 'locked' ? (
+                  <p className="flex items-center gap-2 font-bold">
+                    <Check aria-hidden className="h-5 w-5" />
+                    {t('Owned')}
+                  </p>
+                ) : buy ? (
+                  <a className="tp-btn tp-btn-sm tp-btn-accent" href={withDiscount(buy.checkoutUrl, promo)} target="_blank" rel="noreferrer">
+                    <ShoppingCart aria-hidden className="h-5 w-5" />
+                    {buy.price ? t('Buy for {price}', { price: buy.price }) : t('Buy')}
+                  </a>
+                ) : (
+                  <span className="font-semibold tp-muted">{loaded ? t('Coming soon') : t('Loading the store…')}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <form className="tp-panel flex flex-col gap-3" onSubmit={submit}>
         <h2 className="flex items-center gap-2 text-2xl">

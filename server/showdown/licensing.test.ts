@@ -237,8 +237,9 @@ describe('bundles cover the packs released by the purchase date', () => {
       const res = await route('activate', { key: KEY }, ENV, provider);
       const ids = res.body.packIds as string[];
       expect(ids).not.toContain('future-pack');
-      expect(ids.length).toBe(QUESTION_PACKS.length - 1);
-      expect((res.body.packs as unknown[]).length).toBe(QUESTION_PACKS.length - 1);
+      const owned = QUESTION_PACKS.filter((p) => p.released <= '2026-10-01').length;
+      expect(ids.length).toBe(owned);
+      expect((res.body.packs as unknown[]).length).toBe(owned);
       const token = res.body.token;
       const later = await route('pack', { token, packId: 'future-pack' }, ENV, provider);
       expect(later.status).toBe(403);

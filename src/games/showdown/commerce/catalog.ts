@@ -1,3 +1,4 @@
+import { ERA_PACKS } from '../../../core/commerce/eraPacks';
 import { msg } from '../../../core/i18n/msg';
 
 /*
@@ -53,6 +54,7 @@ export const PACK_CATALOG: PackInfo[] = [
   { id: 'bible-basics', name: msg("Bible Basics"), description: msg("Easy questions about the best-known people and teachings in the Bible."), questionCount: 14, finalChallengeCount: 5, beginner: true, es: true },
   { id: 'famous-stories', name: msg("Famous Bible Stories"), description: msg("Noah, David and Goliath, Jonah, Daniel and more, told simply."), questionCount: 14, finalChallengeCount: 5, beginner: true, es: true },
   { id: 'everyday-values', name: msg("Everyday Values"), description: msg("Kindness, honesty, respect and friendship. Anyone can play, no Bible background needed."), questionCount: 14, finalChallengeCount: 5, beginner: true, es: true },
+  ...ERA_PACKS.map((p) => ({ ...p, questionCount: 14, finalChallengeCount: 5, es: true })),
 ];
 
 export function packInfo(id: string): PackInfo | undefined {

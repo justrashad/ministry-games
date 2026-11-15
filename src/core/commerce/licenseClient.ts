@@ -157,6 +157,8 @@ export interface LicenseClient {
   /** Checkout links and prices come from the server so they can change without an app update. Null while the store is closed. */
   loadStoreCatalog(force?: boolean): Promise<StoreProduct[] | null>;
   loadPromo(): Promise<StorePromo | null>;
+  /** Downloads an owned pack in the given language (after a language switch, or a pack released after a bundle was activated). */
+  requestPack(packId: string, lang: string): Promise<{ ok: true; pack: PackPayload } | { ok: false; error: string }>;
 }
 
 export function createLicenseClient(options: LicenseClientOptions = {}): LicenseClient {
@@ -303,5 +305,17 @@ export function createLicenseClient(options: LicenseClientOptions = {}): License
     revalidateIfDue,
     loadStoreCatalog: (force = false) => loadStoreInfo(force).then((info) => info?.products ?? null),
     loadPromo: () => loadStoreInfo().then((info) => (info?.promo && info.promo.ends > Date.now() ? info.promo : null)),
+    requestPack: async (packId, lang) => {
+      const state = store.get();
+      const record = state.packs[packId] ?? (state.allPacks && (!state.allPacks.packIds || state.allPacks.packIds.includes(packId)) ? state.allPacks : null);
+      if (!record) return { ok: false, error: msg('This pack is not activated on this device.') };
+      const reply = await post('/api/pack', { token: record.token, packId, lang });
+      if (!reply.ok) {
+        if (reply.revoked) removeRecordsWithToken(record.token);
+        return { ok: false, error: reply.error };
+      }
+      if (!isPackPayload(reply.pack)) return { ok: false, error: msg('The store sent an unexpected reply. Try again in a minute.') };
+      return { ok: true, pack: reply.pack };
+    },
   };
 }

@@ -6,9 +6,11 @@ export interface Setup {
   teamNames: [string, string];
   /** Games a team must win to take the match. */
   gamesToWin: number;
+  /** Statement packs switched off on the New game screen ('starter' for the starter pack). */
+  skippedPacks: string[];
 }
 
-export const DEFAULT_SETUP: Setup = { teamNames: ['', ''], gamesToWin: 2 };
+export const DEFAULT_SETUP: Setup = { teamNames: ['', ''], gamesToWin: 2, skippedPacks: [] };
 
 const NAME_MAX = 24;
 
@@ -28,6 +30,7 @@ function sanitize(raw: unknown): Setup {
   return {
     teamNames: [cleanTeamName(names[0]), cleanTeamName(names[1])],
     gamesToWin: clampInt(s.gamesToWin, MATCH_LIMITS.gamesToWin.min, MATCH_LIMITS.gamesToWin.max, DEFAULT_SETUP.gamesToWin),
+    skippedPacks: Array.isArray(s.skippedPacks) ? s.skippedPacks.filter((id): id is string => typeof id === 'string').slice(0, 50) : [],
   };
 }
 

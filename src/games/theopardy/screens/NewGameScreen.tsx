@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useLang, useT } from '../../../core/i18n/i18n';
-import { DEMO, demoClues, license } from '../commerce/license';
+import { DEMO, demoClues, isFinalClue, license, packLibrary } from '../commerce/license';
+import { PackPicker, STARTER_ID } from '../components/PackPicker';
 import { STARTER_PACK } from '../data/starterPack';
 import { STARTER_PACK_ES } from '../data/starterPackEs';
 import { BOARD_LIMITS, createGame, DEFAULT_TEAMS } from '../engine/createGame';
@@ -19,6 +20,8 @@ export function NewGameScreen() {
   const [names, setNames] = useState<[string, string]>(saved.teamNames);
   const [rounds, setRounds] = useState(saved.rounds);
   const [categories, setCategories] = useState(saved.categories);
+  const [skipped, setSkipped] = useState<string[]>(saved.skippedPacks);
+  const toggle = (id: string) => setSkipped((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const [openTv, setOpenTv] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const running = getGameState();
@@ -28,10 +31,12 @@ export function NewGameScreen() {
     e.preventDefault();
     const teamNames: [string, string] = [cleanTeamName(names[0]), cleanTeamName(names[1])];
     const pack = lang === 'es' ? STARTER_PACK_ES : STARTER_PACK;
-    // The free demo plays one short board from the first categories, with no final round.
+    // The free demo plays one short board from the first categories of the starter pack, with no final round.
+    const chosen = unlocked ? packLibrary.packsIn(lang).filter((p) => !skipped.includes(p.id)).flatMap((p) => p.questions) : [];
+    const useStarter = !unlocked || !skipped.includes(STARTER_ID);
     const result = createGame({
-      clues: unlocked ? pack.clues : demoClues(pack),
-      finals: unlocked ? pack.finals : [],
+      clues: unlocked ? [...(useStarter ? pack.clues : []), ...chosen.filter((c) => !isFinalClue(c))] : demoClues(pack),
+      finals: unlocked ? [...(useStarter ? pack.finals : []), ...chosen.filter(isFinalClue)] : [],
       rounds: unlocked ? rounds : DEMO.rounds,
       categoriesPerRound: unlocked ? categories : DEMO.categories,
       avoidIds: new Set(recentCluesStore.get()),
@@ -44,7 +49,7 @@ export function NewGameScreen() {
       setError(result.error);
       return;
     }
-    setupStore.set(unlocked ? { teamNames, rounds, categories } : { ...saved, teamNames });
+    setupStore.set(unlocked ? { teamNames, rounds, categories, skippedPacks: skipped } : { ...saved, teamNames });
     const game = result.game;
     rememberClues([...game.boards.flatMap((b) => b.categories.flatMap((c) => c.tiles.map((tile) => tile.clue.id))), ...(game.final ? [game.final.clue.id] : [])]);
     dispatchGame({ type: 'NEW_GAME', game });
@@ -108,6 +113,8 @@ export function NewGameScreen() {
           <p className="mt-2 text-sm tp-muted">{t('Fewer categories make a shorter game.')}</p>
         </fieldset>
       </div>
+
+      {unlocked && <PackPicker skipped={skipped} onToggle={toggle} starterName={t('Starter Pack')} />}
 
       <label className="flex items-center gap-3 text-lg font-semibold">
         <input type="checkbox" className="h-6 w-6 accent-ice-400" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />

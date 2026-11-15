@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useLang, useT } from '../../../core/i18n/i18n';
-import { DEMO, demoStatements, license } from '../commerce/license';
+import { DEMO, demoStatements, license, packLibrary } from '../commerce/license';
+import { PackPicker, STARTER_ID } from '../components/PackPicker';
 import { STARTER_PACK } from '../data/starterPack';
 import { STARTER_PACK_ES } from '../data/starterPackEs';
 import { createGame, DEFAULT_TEAMS } from '../engine/createGame';
@@ -15,6 +16,8 @@ export function NewGameScreen() {
   const saved = setupStore.useValue();
   const [names, setNames] = useState<[string, string]>(saved.teamNames);
   const [gamesToWin, setGamesToWin] = useState(saved.gamesToWin);
+  const [skipped, setSkipped] = useState<string[]>(saved.skippedPacks);
+  const toggle = (id: string) => setSkipped((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const [openTv, setOpenTv] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const running = getGameState();
@@ -33,7 +36,9 @@ export function NewGameScreen() {
     // Statements from the match being replaced count as recent, so the new one starts with fresh ones.
     if (running) rememberStatements(running.played.map((p) => p.questionId));
     const result = createGame({
-      statements: unlocked ? pack.statements : demoStatements(pack),
+      statements: unlocked
+        ? [...(skipped.includes(STARTER_ID) ? [] : pack.statements), ...packLibrary.packsIn(lang).filter((p) => !skipped.includes(p.id)).flatMap((p) => p.questions)]
+        : demoStatements(pack),
       gamesToWin: unlocked ? gamesToWin : DEMO.gamesToWin,
       avoidIds: new Set(recentStatementsStore.get()),
       teams: [
@@ -45,7 +50,7 @@ export function NewGameScreen() {
       setError(result.error);
       return;
     }
-    setupStore.set(unlocked ? { teamNames, gamesToWin } : { ...saved, teamNames });
+    setupStore.set(unlocked ? { teamNames, gamesToWin, skippedPacks: skipped } : { ...saved, teamNames });
     dispatchGame({ type: 'NEW_GAME', game: result.game });
     if (openTv) window.open(routeUrl('/game'), 'kingdom-squares-game');
     navigate('/host');
@@ -94,6 +99,8 @@ export function NewGameScreen() {
           </button>
         </div>
       )}
+
+      {unlocked && <PackPicker skipped={skipped} onToggle={toggle} starterName={t('Starter Pack')} />}
 
       <label className="flex items-center gap-3 text-lg font-semibold">
         <input type="checkbox" className="h-6 w-6 accent-ks-accent" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />

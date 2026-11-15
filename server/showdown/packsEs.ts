@@ -1,5 +1,6 @@
 import type { Question } from '../../src/games/showdown/types';
 import { q } from '../../src/games/showdown/data/questionBuilder';
+import { ERA_PACKS_ES } from './eraPacks';
 
 /*
  * PAID CONTENT (Spanish). Bundled only into the Netlify Function, like packs.ts.
@@ -360,4 +361,5 @@ export const QUESTION_PACKS_ES: Record<string, SpanishPack> = {
       q('pk-es-ph-14', HOPE, 'Menciona algo que verás en el Paraíso.', [['Animales', 30], ['Jardines', 26], ['Familia', 22], ['Montañas', 12], ['Ríos', 10]], { ...FC, alternates: [['Flores', 1], ['Seres queridos', 2]] }),
     ],
   },
+  ...ERA_PACKS_ES,
 };

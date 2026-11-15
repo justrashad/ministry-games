@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useLang, useT } from '../../../core/i18n/i18n';
-import { DEMO, license } from '../commerce/license';
+import { DEMO, isBonusQuestion, license, packLibrary } from '../commerce/license';
+import { PackPicker, STARTER_ID } from '../components/PackPicker';
 import { STARTER_PACK } from '../data/starterPack';
 import { STARTER_PACK_ES } from '../data/starterPackEs';
 import { createGame, DEFAULT_TEAMS, questionIds } from '../engine/createGame';
@@ -15,6 +16,8 @@ export function NewGameScreen() {
   const saved = setupStore.useValue();
   const [names, setNames] = useState<[string, string]>(saved.teamNames);
   const [openTv, setOpenTv] = useState(true);
+  const [skipped, setSkipped] = useState<string[]>(saved.skippedPacks);
+  const toggle = (id: string) => setSkipped((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const [error, setError] = useState<string | null>(null);
   const running = getGameState();
   const inProgress = !!running && running.phase !== 'gameOver';
@@ -23,9 +26,12 @@ export function NewGameScreen() {
     e.preventDefault();
     const teamNames: [string, string] = [cleanTeamName(names[0]), cleanTeamName(names[1])];
     const pack = lang === 'es' ? STARTER_PACK_ES : STARTER_PACK;
+    // The demo plays the starter pack only.
+    const chosen = unlocked ? packLibrary.packsIn(lang).filter((p) => !skipped.includes(p.id)).flatMap((p) => p.questions) : [];
+    const useStarter = !unlocked || !skipped.includes(STARTER_ID);
     const result = createGame({
-      questions: pack.questions,
-      bonus: unlocked ? pack.bonus : [],
+      questions: [...(useStarter ? pack.questions : []), ...chosen.filter((q) => !isBonusQuestion(q))],
+      bonus: unlocked ? [...(useStarter ? pack.bonus : []), ...chosen.filter(isBonusQuestion)] : [],
       perStage: unlocked ? 2 : DEMO.perStage,
       avoidIds: new Set(recentQuestionsStore.get()),
       teams: [
@@ -37,7 +43,7 @@ export function NewGameScreen() {
       setError(result.error);
       return;
     }
-    setupStore.set({ teamNames });
+    setupStore.set({ teamNames, skippedPacks: unlocked ? skipped : saved.skippedPacks });
     rememberQuestions(questionIds(result.game));
     dispatchGame({ type: 'NEW_GAME', game: result.game });
     if (openTv) window.open(routeUrl('/game'), 'spiritual-babe-game');
@@ -75,6 +81,8 @@ export function NewGameScreen() {
           </button>
         </div>
       )}
+
+      {unlocked && <PackPicker skipped={skipped} onToggle={toggle} starterName={t('Starter Pack')} />}
 
       <label className="flex items-center gap-3 text-lg font-semibold">
         <input type="checkbox" className="h-6 w-6 accent-sb-accent" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />

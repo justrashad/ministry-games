@@ -6,9 +6,11 @@ export interface Setup {
   teamNames: [string, string];
   rounds: number;
   categories: number;
+  /** Question packs switched off on the New game screen ('starter' for the starter pack). */
+  skippedPacks: string[];
 }
 
-export const DEFAULT_SETUP: Setup = { teamNames: ['', ''], rounds: 2, categories: 6 };
+export const DEFAULT_SETUP: Setup = { teamNames: ['', ''], rounds: 2, categories: 6, skippedPacks: [] };
 
 const NAME_MAX = 24;
 
@@ -29,6 +31,7 @@ function sanitize(raw: unknown): Setup {
     teamNames: [cleanTeamName(names[0]), cleanTeamName(names[1])],
     rounds: clampInt(s.rounds, BOARD_LIMITS.rounds.min, BOARD_LIMITS.rounds.max, DEFAULT_SETUP.rounds),
     categories: clampInt(s.categories, BOARD_LIMITS.categories.min, BOARD_LIMITS.categories.max, DEFAULT_SETUP.categories),
+    skippedPacks: Array.isArray(s.skippedPacks) ? s.skippedPacks.filter((id): id is string => typeof id === 'string').slice(0, 50) : [],
   };
 }
 

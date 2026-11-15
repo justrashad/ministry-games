@@ -41,8 +41,8 @@ export function UpdatePrompt({ quiet = false }: { quiet?: boolean }) {
   if (quiet) return null;
   if (needRefresh) {
     return (
-      <div className="fixed inset-x-0 top-3 z-50 flex justify-center px-4" role="status">
-        <div className="tp-pop flex items-center gap-3 rounded-2xl bg-sea-800 px-4 py-3 shadow-2xl ring-2 ring-ice-300">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-4" role="status">
+        <div className="pointer-events-auto tp-pop flex items-center gap-3 rounded-2xl bg-sea-800 px-4 py-3 shadow-2xl ring-2 ring-ice-300">
           <p className="font-bold">{t('A new version of {title} is ready.', { title: TITLE.name })}</p>
           <button type="button" className="tp-btn tp-btn-sm tp-btn-accent" onClick={() => void updateServiceWorker(true)}>
             <RefreshCw aria-hidden className="h-5 w-5" />
@@ -57,7 +57,7 @@ export function UpdatePrompt({ quiet = false }: { quiet?: boolean }) {
   }
   if (showReady) {
     return (
-      <div className="fixed inset-x-0 top-3 z-50 flex justify-center px-4" role="status">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center px-4" role="status">
         <p className="tp-pop rounded-2xl bg-sea-800 px-4 py-3 font-bold shadow-2xl ring-2 ring-ice-300">{t('{title} is ready to play offline.', { title: TITLE.name })}</p>
       </div>
     );
