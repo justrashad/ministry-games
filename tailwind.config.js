@@ -62,6 +62,22 @@ export default {
           alert: 'var(--ks-alert)',
           red: 'var(--ks-red)',
         },
+        // Are You Smarter Than a Spiritual Babe?: colors are CSS variables in src/games/babe/theme.css.
+        sb: {
+          ground: 'var(--sb-ground)',
+          panel: 'var(--sb-panel)',
+          sunk: 'var(--sb-sunk)',
+          line: 'var(--sb-line)',
+          soft: 'var(--sb-soft)',
+          'soft-line': 'var(--sb-soft-line)',
+          'soft-text': 'var(--sb-soft-text)',
+          text: 'var(--sb-text)',
+          muted: 'var(--sb-muted)',
+          accent: 'var(--sb-accent)',
+          teal: 'var(--sb-teal)',
+          alert: 'var(--sb-alert)',
+          card: 'var(--sb-card)',
+        },
       },
       fontFamily: {
         display: ['"Fredoka Variable"', 'Fredoka', 'ui-rounded', 'system-ui', 'sans-serif'],

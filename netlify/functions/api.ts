@@ -1,6 +1,7 @@
 import { lemonSqueezyClient, route, type Route } from '../../server/core/licensing';
 import type { TitleContent } from '../../server/core/licensing';
 import { SHOWDOWN_TITLE } from '../../server/showdown/title';
+import { BABE_TITLE } from '../../server/babe/title';
 import { SQUARES_TITLE } from '../../server/squares/title';
 import { THEOPARDY_TITLE } from '../../server/theopardy/title';
 
@@ -9,6 +10,7 @@ const TITLES: Record<string, TitleContent> = {
   showdown: SHOWDOWN_TITLE,
   theopardy: THEOPARDY_TITLE,
   squares: SQUARES_TITLE,
+  babe: BABE_TITLE,
 };
 
 const ROUTES: Record<string, Route> = {

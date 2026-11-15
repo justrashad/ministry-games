@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * The game's colorway, Sunrise. Every color the game uses is one of these
+ * variables, so a different colorway is a change to this block only.
+ *
+ * White ground, sunrise orange for main actions and team 1, teal for team 2,
+ * soft peach for the questions still on a board.
+ */
+:root {
+  color-scheme: light;
+  --sb-ground: #ffffff;
+  --sb-panel: #ffffff;
+  --sb-sunk: #f3f4f6;
+  --sb-line: #e5e7eb;
+  --sb-soft: #ffedd5;
+  --sb-soft-line: #fdba74;
+  --sb-soft-text: #9a3412;
+  --sb-text: #1f2937;
+  --sb-muted: #6b7280;
+  --sb-accent: #ea580c;
+  --sb-accent-hover: #c2410c;
+  --sb-on-accent: #ffffff;
+  --sb-teal: #0d9488;
+  --sb-teal-hover: #0f766e;
+  --sb-alert: #b91c1c;
+  --sb-card: #9a3412;
+  --sb-on-card: #ffffff;
+  --sb-team-0: #ea580c;
+  --sb-on-team-0: #ffffff;
+  --sb-team-1: #0d9488;
+  --sb-on-team-1: #ffffff;
+  --sb-radius: 16px;
+  --sb-font: 'Baloo 2 Variable', 'Baloo 2', system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--sb-ground);
+    color: var(--sb-text);
+    font-family: var(--sb-font);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid var(--sb-accent);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .sb-btn {
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-lg font-bold transition-[transform,background-color,opacity] duration-150;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sb-btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+  .sb-btn:not(:disabled):active {
+    transform: translateY(2px);
+  }
+  .sb-btn-primary {
+    background-color: var(--sb-accent);
+    color: var(--sb-on-accent);
+  }
+  .sb-btn-primary:not(:disabled):hover {
+    background-color: var(--sb-accent-hover);
+  }
+  .sb-btn-ghost {
+    background-color: var(--sb-sunk);
+    color: var(--sb-text);
+  }
+  .sb-btn-ghost:not(:disabled):hover {
+    background-color: var(--sb-line);
+  }
+  .sb-btn-outline {
+    border: 2px solid var(--sb-accent);
+    color: var(--sb-accent);
+    background-color: transparent;
+  }
+  .sb-btn-teal {
+    background-color: var(--sb-teal);
+    color: #ffffff;
+  }
+  .sb-btn-teal:not(:disabled):hover {
+    background-color: var(--sb-teal-hover);
+  }
+  .sb-btn-danger {
+    border: 2px solid var(--sb-alert);
+    color: var(--sb-alert);
+    background-color: transparent;
+  }
+  .sb-btn-sm {
+    @apply min-h-[44px] px-3.5 py-1.5 text-base;
+  }
+  .sb-btn-xl {
+    @apply min-h-[64px] px-8 py-4 text-2xl;
+  }
+
+  .sb-panel {
+    @apply rounded-2xl p-5;
+    background-color: var(--sb-panel);
+    border: 1px solid var(--sb-line);
+  }
+  .sb-label {
+    @apply mb-1.5 block text-sm font-bold uppercase tracking-wide;
+    color: var(--sb-muted);
+  }
+  .sb-input {
+    @apply min-h-[48px] w-full rounded-xl px-4 text-lg font-semibold;
+    background-color: var(--sb-panel);
+    border: 2px solid var(--sb-line);
+    color: var(--sb-text);
+  }
+  .sb-input:focus {
+    border-color: var(--sb-accent);
+  }
+  .sb-muted {
+    color: var(--sb-muted);
+  }
+  .sb-alert {
+    @apply rounded-xl p-3 font-semibold;
+    border: 2px solid var(--sb-alert);
+    color: var(--sb-alert);
+  }
+
+  /* An open square on the board. */
+  .sb-open {
+    @apply flex items-center justify-center rounded-2xl font-semibold;
+    background-color: var(--sb-soft);
+    border: 3px solid var(--sb-soft-line);
+    color: var(--sb-soft-text);
+    font-variant-numeric: tabular-nums;
+  }
+  /* The square in play, or the winning line. */
+  .sb-ring {
+    box-shadow:
+      0 0 0 4px var(--sb-ground),
+      0 0 0 9px var(--sb-accent);
+  }
+  .sb-card {
+    background-color: var(--sb-card);
+    color: var(--sb-on-card);
+  }
+}
+
+/*
+ * Team colors. These sit outside the Tailwind layers on purpose: screens build the
+ * class name from the team number (sb-team-0, sb-team-1), and Tailwind drops layered
+ * classes it can't find written out in the code.
+ */
+.sb-team-0 {
+  background-color: var(--sb-team-0);
+  color: var(--sb-on-team-0);
+}
+.sb-team-1 {
+  background-color: var(--sb-team-1);
+  color: var(--sb-on-team-1);
+}
+
+@keyframes sb-pop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.sb-pop {
+  animation: sb-pop 0.28s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-pop {
+    animation: none;
+  }
+  .sb-btn {
+    transition: none;
+  }
+}

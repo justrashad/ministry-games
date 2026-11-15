@@ -52,6 +52,16 @@ export const TITLES: Record<string, TitleInfo> = {
     themeColor: '#1D4ED8',
     backgroundColor: '#FFFFFF',
   },
+  babe: {
+    id: 'babe',
+    name: 'Are You Smarter Than a Spiritual Babe?',
+    shortName: 'Spiritual Babe',
+    description: 'A Bible quiz for two teams, from Newborn to Mature questions, designed for family worship.',
+    storagePrefix: 'spiritual-babe:',
+    peerPrefix: 'spiritual-babe-v1-',
+    themeColor: '#EA580C',
+    backgroundColor: '#FFFFFF',
+  },
 };
 
 export const DEFAULT_TITLE = 'showdown';
