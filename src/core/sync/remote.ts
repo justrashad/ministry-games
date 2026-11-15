@@ -3,6 +3,7 @@ import type { DataConnection, Peer as PeerInstance, PeerOptions } from 'peerjs';
 import { readRaw, writeRaw } from '../lib/storage';
 import type { Transport } from './channel';
 import { activeStore } from './createGameStore';
+import { keepScreenAwake } from '../lib/wakeLock';
 import { TITLE } from '../title';
 import { msg } from '../i18n/i18n';
 import { generateRoomCode, isValidRoomCode, normalizeRoomCode, peerIdForRoom } from './roomCode';
@@ -34,6 +35,12 @@ const JOIN_KEY = `${TITLE.storagePrefix}remote-join`;
 const PING_MS = 4000;
 const STALE_MS = 13000;
 const RETRY_MS = 3000;
+/** Waits before each try to get back to the TV: the first is almost immediate, later ones back off. */
+const RECONNECT_DELAYS_MS = [250, 1000, 2000, RETRY_MS];
+/** How long the TV gets to answer when a phone checks that its connection survived a pause. */
+const PROBE_MS = 2500;
+/** A page hidden for less than this is not checked when it comes back. */
+const PROBE_AFTER_HIDDEN_MS = 2000;
 const CONNECT_TIMEOUT_MS = 10000;
 const MAX_ID_RETRIES = 6;
 const PEER_OPTIONS: PeerOptions = { debug: 0 };
@@ -44,6 +51,8 @@ const listeners = new Set<() => void>();
 function setStatus(patch: Partial<RemoteStatus>): void {
   status = { ...status, ...patch };
   if (!('errorVars' in patch) && 'error' in patch) delete status.errorVars;
+  // A phone that locks its screen stops talking to the TV, so keep it on while it is a remote.
+  keepScreenAwake(status.role === 'remote');
   listeners.forEach((l) => l());
 }
 
@@ -95,6 +104,8 @@ function clearTimers(): void {
 interface Attached {
   transport: Transport;
   close: () => void;
+  /** Asks the other side for an answer; if none arrives in time, the connection is treated as dead. */
+  probe: (timeoutMs: number) => void;
 }
 
 /** Wires a data connection into the game store with a heartbeat that detects silent drops (sleeping phones). */
@@ -110,6 +121,7 @@ function attach(conn: DataConnection, onGone: () => void): Attached {
     },
   };
   let lastSeen = Date.now();
+  let received = 0;
   let done = false;
   const unregister = activeStore().registerTransport(transport);
   const finish = () => {
@@ -133,6 +145,7 @@ function attach(conn: DataConnection, onGone: () => void): Attached {
   }, PING_MS);
   conn.on('data', (raw: unknown) => {
     lastSeen = Date.now();
+    received += 1;
     const store = activeStore();
     const message = store.sanitizeMessage(raw);
     if (message) store.receiveSyncMessage(message, transport);
@@ -148,6 +161,21 @@ function attach(conn: DataConnection, onGone: () => void): Attached {
       } catch {
         /* ignore */
       }
+    },
+    probe: (timeoutMs) => {
+      if (done) return;
+      const before = received;
+      // Every version of the TV answers this request with its current game, so it doubles as a re-sync.
+      transport.post({ type: 'hello', origin: activeStore().origin, wantsSync: true });
+      window.setTimeout(() => {
+        if (done || received !== before) return;
+        finish();
+        try {
+          conn.close();
+        } catch {
+          /* ignore */
+        }
+      }, timeoutMs);
     },
   };
 }
@@ -274,6 +302,7 @@ export async function newRoomCode(): Promise<void> {
 let remotePeer: PeerInstance | null = null;
 let remoteLink: Attached | null = null;
 let everConnected = false;
+let reconnectTries = 0;
 
 function savedJoinCode(): string | null {
   try {
@@ -294,7 +323,9 @@ function saveJoinCode(code: string | null): void {
 
 function scheduleReconnect(): void {
   if (status.role !== 'remote') return;
-  later(connectToRoom, RETRY_MS);
+  const delay = RECONNECT_DELAYS_MS[Math.min(reconnectTries, RECONNECT_DELAYS_MS.length - 1)];
+  reconnectTries += 1;
+  later(connectToRoom, delay);
 }
 
 function connectToRoom(): void {
@@ -320,6 +351,7 @@ function connectToRoom(): void {
   conn.on('open', () => {
     opened = true;
     everConnected = true;
+    reconnectTries = 0;
     remoteLink = attach(conn, () => {
       remoteLink = null;
       if (status.role !== 'remote') return;
@@ -435,6 +467,7 @@ export function leaveRoom(clearSaved = true): void {
   remotePeer?.destroy();
   remotePeer = null;
   everConnected = false;
+  reconnectTries = 0;
   if (status.role !== 'room') setStatus({ role: 'none', phase: 'idle', code: null, phones: 0, error: null });
 }
 
@@ -448,11 +481,38 @@ export function resumeRemoteSession(): void {
   if (code) void joinRoom(code);
 }
 
+/**
+ * Called when a phone comes back from a pause (screen unlocked, app switched back, network returned).
+ * The connection often looks alive when it is not, so it is checked right away instead of waiting
+ * for the heartbeat to notice, and a dead one is replaced immediately.
+ */
+function recoverRemote(): void {
+  if (status.role !== 'remote') return;
+  if (remotePeer?.disconnected && !remotePeer.destroyed) remotePeer.reconnect();
+  if (remoteLink) {
+    remoteLink.probe(PROBE_MS);
+    return;
+  }
+  reconnectTries = 0;
+  connectToRoom();
+}
+
 if (typeof window !== 'undefined') {
+  let hiddenAt: number | null = null;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible' || status.role !== 'remote' || remoteLink) return;
-    if (remotePeer?.disconnected && !remotePeer.destroyed) remotePeer.reconnect();
-    connectToRoom();
+    if (document.visibilityState !== 'visible') {
+      hiddenAt = Date.now();
+      return;
+    }
+    const hiddenFor = hiddenAt === null ? 0 : Date.now() - hiddenAt;
+    hiddenAt = null;
+    if (remoteLink && hiddenFor < PROBE_AFTER_HIDDEN_MS) return;
+    recoverRemote();
+  });
+  window.addEventListener('online', recoverRemote);
+  // Pages restored from the back/forward cache come back with their connections already closed.
+  window.addEventListener('pageshow', (event) => {
+    if ((event as PageTransitionEvent).persisted) recoverRemote();
   });
 }
 
