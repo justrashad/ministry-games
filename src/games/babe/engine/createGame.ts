@@ -34,12 +34,17 @@ function ordered(list: ClueQuestion[], avoid: ReadonlySet<string>, rng: () => nu
   return [...shuffle(list.filter((q) => !avoid.has(q.id)), rng), ...shuffle(list.filter((q) => avoid.has(q.id)), rng)];
 }
 
-/** Takes `count` questions for one team's stage, preferring subjects that team doesn't already have at that stage. */
-function takeFor(pool: ClueQuestion[], count: number): ClueQuestion[] {
+/**
+ * Takes `count` questions for one team's stage. Fresh questions always come before
+ * recently played ones; among those, a subject the team doesn't already have at that stage.
+ */
+function takeFor(pool: ClueQuestion[], count: number, avoid: ReadonlySet<string>): ClueQuestion[] {
   const picked: ClueQuestion[] = [];
+  const newSubject = (q: ClueQuestion) => !picked.some((p) => p.category === q.category);
   while (picked.length < count && pool.length > 0) {
-    const i = pool.findIndex((q) => !picked.some((p) => p.category === q.category));
-    picked.push(pool.splice(i === -1 ? 0 : i, 1)[0]);
+    const tests = [(q: ClueQuestion) => !avoid.has(q.id) && newSubject(q), (q: ClueQuestion) => !avoid.has(q.id), newSubject];
+    const i = tests.map((test) => pool.findIndex(test)).find((index) => index !== -1) ?? 0;
+    picked.push(pool.splice(i, 1)[0]);
   }
   return picked;
 }
@@ -69,7 +74,7 @@ export function createGame(input: CreateGameInput): CreateGameResult {
       return { ok: false, error: `Each stage needs at least ${perStage * 2} questions. Stage ${stage + 1} has ${pool.length}.` };
     }
     for (const team of [0, 1] as const) {
-      boards[team].stages.push(takeFor(pool, perStage).map((question): Slot => ({ question, result: null })));
+      boards[team].stages.push(takeFor(pool, perStage, avoid).map((question): Slot => ({ question, result: null })));
     }
     spares.push(pool);
   }
