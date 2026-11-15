@@ -12,7 +12,7 @@
 
 export type CrowdSound = 'applause' | 'applauseShort' | 'cheer' | 'bigCheer' | 'aww' | 'ooh';
 
-export const RATE = 24000;
+export const RATE = 32000;
 
 export type Stereo = [Float32Array<ArrayBuffer>, Float32Array<ArrayBuffer>];
 
@@ -83,32 +83,98 @@ function swell(u: number, attack: number, releaseFrom: number): number {
   return 1;
 }
 
-/** Many people clapping, each at their own pace, brightness and place in the room. */
-function applause(seconds: number, clappers: number, density: number): Stereo {
-  const buf = stereo(seconds);
+/** A one-pole low-pass, for distance and for softening the vocal source. */
+class LowPass {
+  private k: number;
+  private y = 0;
+
+  constructor(freq: number) {
+    this.k = 1 - Math.exp((-2 * Math.PI * freq) / RATE);
+  }
+
+  run(x: number): number {
+    this.y += this.k * (x - this.y);
+    return this.y;
+  }
+}
+
+/**
+ * Hand claps after the physical model of clapping (Peltola et al.): each clap
+ * is a sharp burst of noise ringing through the resonance of the air pocket
+ * between the palms. Cupped hands ring low and long, flat hands high and short,
+ * and every person keeps their own hand shape and their own tempo.
+ */
+interface Clapper {
+  freq: number;
+  q: number;
+  decay: number;
+  crack: number;
+  rate: number;
+  loud: number;
+  pan: number;
+}
+
+function makeClapper(distance: number): Clapper {
+  const cupped = Math.random() < 0.4;
+  return {
+    freq: cupped ? rand(550, 1000) : rand(1000, 2300),
+    q: cupped ? rand(3, 7) : rand(1.5, 4),
+    decay: (cupped ? rand(0.009, 0.016) : rand(0.005, 0.01)) * RATE,
+    crack: cupped ? rand(0.15, 0.3) : rand(0.3, 0.55),
+    rate: rand(3.6, 5.6),
+    loud: rand(0.55, 1) * distance,
+    pan: Math.random(),
+  };
+}
+
+function clapLayer(buf: Stereo, seconds: number, count: number, distance: number, cutoff: number, attack: number, release: number): void {
   const n = buf[0].length;
-  const clapLen = Math.floor(0.045 * RATE);
-  for (let c = 0; c < clappers; c++) {
-    const pan = Math.random();
-    const gl = Math.cos((pan * Math.PI) / 2);
-    const gr = Math.sin((pan * Math.PI) / 2);
-    const bp = new BandPass(rand(700, 2600), rand(0.7, 1.4));
-    const rate = density * rand(0.75, 1.25);
-    const stop = seconds * rand(0.6, 0.95);
-    const loud = rand(0.4, 1);
-    const decay = rand(0.004, 0.009) * RATE;
-    let t = rand(0, 0.25);
+  const clapLen = Math.floor(0.08 * RATE);
+  for (let c = 0; c < count; c++) {
+    const p = makeClapper(distance);
+    const gl = Math.cos((p.pan * Math.PI) / 2);
+    const gr = Math.sin((p.pan * Math.PI) / 2);
+    const body = new BandPass(p.freq, p.q);
+    const air = new LowPass(cutoff);
+    const stop = seconds * rand(release * 0.85, release * 1.1);
+    let tempo = p.rate;
+    let t = rand(0, attack);
     while (t < stop) {
       const start = Math.floor(t * RATE);
-      const amp = loud * swell(t / seconds, 0.12, 0.55) * rand(0.7, 1);
+      // Each clap lands a little differently: force, timing and hand position all wobble.
+      const force = p.loud * rand(0.75, 1.15) * envelope(t / seconds, attack / seconds, stop / seconds);
+      const ring = p.freq * rand(0.94, 1.06);
+      body.set(ring, p.q);
       for (let i = 0; i < clapLen && start + i < n; i++) {
-        const v = bp.run((Math.random() * 2 - 1) * Math.exp(-i / decay)) * amp;
+        const atk = i < 8 ? i / 8 : 1;
+        const noise = Math.random() * 2 - 1;
+        const e = Math.exp(-i / p.decay);
+        const crackE = Math.exp(-i / (p.decay * 0.35));
+        const v = air.run(body.run(noise * e) * 2.2 + noise * crackE * p.crack) * atk * force;
         buf[0][start + i] += v * gl;
         buf[1][start + i] += v * gr;
       }
-      t += (1 / rate) * rand(0.8, 1.2);
+      tempo += rand(-0.15, 0.15);
+      tempo = Math.min(6.2, Math.max(3.2, tempo));
+      t += (1 / tempo) * rand(0.9, 1.1);
     }
   }
+}
+
+/** Loudness of the whole room over time: a burst, a hold, then it dies away. */
+function envelope(u: number, attack: number, end: number): number {
+  if (u < attack) return 0.4 + 0.6 * (u / attack);
+  const fade = end * 0.6;
+  if (u > fade) return Math.max(0, 1 - (u - fade) / (end - fade)) ** 1.3;
+  return 1;
+}
+
+/** An audience: a few people close by, a crowd in the middle and more at the back. */
+function applause(seconds: number, size: number): Stereo {
+  const buf = stereo(seconds);
+  clapLayer(buf, seconds, Math.round(6 * size), 1, 9000, 0.12, 0.95);
+  clapLayer(buf, seconds, Math.round(22 * size), 0.55, 5000, 0.25, 0.9);
+  clapLayer(buf, seconds, Math.round(50 * size), 0.32, 2800, 0.4, 0.85);
   return normalize(buf, 0.85);
 }
 
@@ -157,6 +223,7 @@ function voices(shape: VoiceShape): Stereo {
     const vibDepth = rand(0.008, 0.025);
     const shift = female ? 1.12 : 1;
     const bands = [0, 1, 2].map(() => new BandPass(500, 5));
+    const tilt = new LowPass(base * 3);
     const gains = [1, 0.55, 0.22];
     const loud = rand(0.5, 1);
     let phase = Math.random();
@@ -178,7 +245,7 @@ function voices(shape: VoiceShape): Stereo {
       phase += f0 / RATE;
       if (phase >= 1) phase -= 1;
       // A glottal-ish pulse: a sawtooth with a little breath noise mixed in.
-      const src = (2 * phase - 1) * 0.6 + (Math.random() * 2 - 1) * (shape.breath ?? 0.12);
+      const src = tilt.run(2 * phase - 1) * 1.6 + (Math.random() * 2 - 1) * (shape.breath ?? 0.12);
       let s = 0;
       for (let j = 0; j < 3; j++) s += bands[j].run(src) * gains[j];
       const amp = loud * shape.env(u) * Math.min(1, i / (0.04 * RATE));
@@ -217,14 +284,14 @@ function whistles(seconds: number, count: number): Stereo {
 export function build(name: CrowdSound): Stereo {
   switch (name) {
     case 'applause':
-      return applause(3.6, 46, 5.5);
+      return applause(3.6, 1);
     case 'applauseShort':
-      return applause(1.8, 30, 6);
+      return applause(1.8, 0.7);
     case 'cheer':
     case 'bigCheer': {
       const big = name === 'bigCheer';
       const seconds = big ? 5 : 3.2;
-      const out = applause(seconds, big ? 60 : 40, 6);
+      const out = applause(seconds, big ? 1.3 : 1);
       for (const ch of out) for (let i = 0; i < ch.length; i++) ch[i] *= 0.75;
       const yeah = voices({
         seconds,
