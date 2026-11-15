@@ -1,21 +1,5 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/fredoka';
 import '@fontsource-variable/nunito';
 import './index.css';
-import App from './App';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { consumePurchaseLink } from './lib/router';
-
-consumePurchaseLink();
-
-const root = document.getElementById('root');
-if (root) {
-  createRoot(root).render(
-    <StrictMode>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </StrictMode>,
-  );
-}
+// "@title" points at src/games/<TITLE>, chosen at build time, so only that title's code is bundled.
+import '@title/entry';

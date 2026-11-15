@@ -1,5 +1,11 @@
-import { lemonSqueezyClient, route, type Route } from '../../server/licensing';
-import { SHOWDOWN_TITLE } from '../../server/showdownTitle';
+import { lemonSqueezyClient, route, type Route } from '../../server/core/licensing';
+import type { TitleContent } from '../../server/core/licensing';
+import { SHOWDOWN_TITLE } from '../../server/showdown/title';
+
+/** Every title this function can serve. The site's TITLE setting picks one; with none set it is Ministry Showdown. */
+const TITLES: Record<string, TitleContent> = {
+  showdown: SHOWDOWN_TITLE,
+};
 
 const ROUTES: Record<string, Route> = {
   '/api/activate': 'activate',
@@ -34,7 +40,12 @@ export default async (req: Request): Promise<Response> => {
     }
   }
   const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
-  const result = await route(name, body, env, lemonSqueezyClient(), SHOWDOWN_TITLE);
+  const title = TITLES[(env.TITLE ?? '').trim() || 'showdown'];
+  if (!title) {
+    console.error('Store configuration error: unknown TITLE', env.TITLE);
+    return json(503, { ok: false, error: 'The store is not open yet.' });
+  }
+  const result = await route(name, body, env, lemonSqueezyClient(), title);
   // Never expose configuration details to visitors; they are logged for the owner instead.
   if (result.body.configError) {
     console.error('Store configuration error:', result.body.configError);

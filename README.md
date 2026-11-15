@@ -211,26 +211,49 @@ Nothing is sent to a server. Clearing site data in the browser erases it, so exp
 
 ## Project structure
 
+This repository holds more than one title. Ministry Showdown is the first; the others are built on the same shared code. One title is built at a time, chosen by the `TITLE` environment variable. With no `TITLE` set, Ministry Showdown is built.
+
 ```
+titles.config.ts            Every title: id, name, storage prefix, phone-remote prefix, colors
 src/
-  types.ts                  Shared types: questions, settings, game state, history
-  engine/                   Pure game logic (no React), fully unit tested
-    game.ts                 Main reducer: rounds, reveals, strikes, steals, scoring, timer
-    finalChallenge.ts       Final Challenge reducer and scoring
-    createGame.ts           Builds a new game from settings and a question set
-    questionPicker.ts       Ordering, shuffling, no-repeat selection
-    matching.ts             Forgiving answer matching for the Final Challenge
-    validation.ts           Question and import validation
-    timer.ts, events.ts, defaults.ts, random.ts
-  data/sampleQuestions.ts   Built-in sample content
-  state/                    Persistent stores (settings, library, history)
-  sync/                     Replicated game store, transports (BroadcastChannel, WebRTC phone remote), presence, room codes
-  hooks/                    Motion, count-up, sounds, timer driver, history recorder
-  lib/                      Storage, sound synthesis, confetti, router, downloads
-  components/ui/            Buttons, modal, confirm, toast, fields, toggle, tabs
-  components/game/          Board, scores, strikes, timer, round header, wordmark
-  screens/                  Home, New game, Game screen, Host, Questions, Settings, History, How to play
+  main.tsx                  Loads the entry of the title being built ("@title/entry")
+  core/                     Shared by every title. Never imports from a title (a test enforces this)
+    title.ts                The title this build is for
+    sync/                   Replicated game store, transports (BroadcastChannel, WebRTC phone remote), presence, room codes
+    questions/              Shared question format: survey, clue and true/false, with validators
+    i18n/                   Translation mechanism; each title registers its own Spanish text
+    state/persistentStore   Saved-in-the-browser store used by settings, library, history, licenses
+    lib/                    Storage, sound synthesis, confetti, downloads, ids
+    components/ui/          Buttons, modal, confirm, toast, fields, toggle, tabs
+    components/             Error boundary, update prompt
+    hooks/                  Count-up, clock
+  games/showdown/           Ministry Showdown
+    entry.tsx               Starts the app
+    types.ts                Questions, settings, game state, history
+    engine/                 Pure game logic (no React), fully unit tested
+      game.ts               Main reducer: rounds, reveals, strikes, steals, scoring, timer
+      finalChallenge.ts     Final Challenge reducer and scoring
+      syncDefinition.ts     What the shared sync layer needs to know about this game
+      createGame.ts, questionPicker.ts, matching.ts, validation.ts, timer.ts, events.ts, defaults.ts, random.ts
+    data/                   Built-in sample content
+    state/                  Settings, library, history
+    sync/gameStore.ts       The shared store bound to this game's rules
+    commerce/               Store catalog, pricing, license records
+    i18n/es.ts              Spanish text
+    components/, screens/, hooks/, lib/
+    public/                 Icons, landing media, redirects
+server/
+  core/licensing.ts         License checks shared by every title
+  showdown/                 Ministry Showdown's paid packs (English and Spanish) and its server settings
+netlify/functions/api.ts    The store's server function; serves the title named by TITLE
 ```
+
+### Adding a title
+
+1. Add it to `titles.config.ts` with its own `storagePrefix` and `peerPrefix`.
+2. Create `src/games/<id>/entry.tsx` and the game's own engine and screens. Build its store with `createGameStore` from `src/core/sync`.
+3. Create `server/<id>/title.ts` with its packs and register it in `netlify/functions/api.ts`.
+4. Create a Netlify site for it and set `TITLE=<id>` in that site's environment variables.
 
 ## Browser support
 

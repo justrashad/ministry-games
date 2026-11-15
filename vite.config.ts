@@ -1,10 +1,24 @@
+import { env } from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { titleFor } from './titles.config';
+
+// One title is built at a time. TITLE picks it; with none set, Ministry Showdown is built.
+const title = titleFor(env.TITLE);
+const titleDir = fileURLToPath(new URL(`./src/games/${title.id}`, import.meta.url));
 
 // base: './' keeps the production build portable (it can be opened from any folder or static host).
 export default defineConfig({
   base: './',
+  publicDir: `${titleDir}/public`,
+  resolve: {
+    alias: { '@title': titleDir },
+  },
+  define: {
+    __TITLE__: JSON.stringify(title),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -13,11 +27,11 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Ministry Showdown',
-        short_name: 'Showdown',
-        description: 'A family-friendly survey guessing game designed for family worship.',
-        theme_color: '#130d3d',
-        background_color: '#0b0828',
+        name: title.name,
+        short_name: title.shortName,
+        description: title.description,
+        theme_color: title.themeColor,
+        background_color: title.backgroundColor,
         display: 'standalone',
         orientation: 'any',
         start_url: './#/',

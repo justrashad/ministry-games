@@ -1,0 +1,43 @@
+/*
+ * Every title built from this repository. One title is built at a time: set the
+ * TITLE environment variable to its id (TITLE=theopardy npm run build). With no
+ * TITLE set, Ministry Showdown is built, so its Netlify site needs no setting.
+ *
+ * Each title's own code lives in src/games/<id> and its paid packs in server/<id>.
+ */
+
+export interface TitleInfo {
+  /** Folder name under src/games and server, and the id written into license tokens. */
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+  /** Prefix for everything this title saves in the browser. Never change it for a released title. */
+  storagePrefix: string;
+  /** Prefix for phone-remote room ids. Never change it for a released title. */
+  peerPrefix: string;
+  themeColor: string;
+  backgroundColor: string;
+}
+
+export const TITLES: Record<string, TitleInfo> = {
+  showdown: {
+    id: 'showdown',
+    name: 'Ministry Showdown',
+    shortName: 'Showdown',
+    description: 'A family-friendly survey guessing game designed for family worship.',
+    // Kept as 'survey-showdown:' from before the rename so existing families keep their questions and history.
+    storagePrefix: 'survey-showdown:',
+    peerPrefix: 'ministry-showdown-v1-',
+    themeColor: '#130d3d',
+    backgroundColor: '#0b0828',
+  },
+};
+
+export const DEFAULT_TITLE = 'showdown';
+
+export function titleFor(id: string | undefined): TitleInfo {
+  const title = TITLES[id?.trim() || DEFAULT_TITLE];
+  if (!title) throw new Error(`Unknown TITLE "${id}". Known titles: ${Object.keys(TITLES).join(', ')}.`);
+  return title;
+}

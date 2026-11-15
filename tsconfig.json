@@ -14,7 +14,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "paths": { "@title/*": ["./src/games/showdown/*"] },
     "types": ["vite/client", "vite-plugin-pwa/react", "vite-plugin-pwa/info"]
   },
-  "include": ["src", "server", "netlify", "vite.config.ts"]
+  "include": ["src", "server", "netlify", "vite.config.ts", "titles.config.ts"]
 }
