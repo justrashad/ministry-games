@@ -39,8 +39,8 @@ export const TITLES: Record<string, TitleInfo> = {
     description: 'A Bible clue board game for two teams, designed for family worship.',
     storagePrefix: 'theopardy:',
     peerPrefix: 'theopardy-v1-',
-    themeColor: '#061A2E',
-    backgroundColor: '#061A2E',
+    themeColor: '#0A2152',
+    backgroundColor: '#0A2152',
   },
 };
 

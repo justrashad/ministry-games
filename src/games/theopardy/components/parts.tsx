@@ -6,7 +6,7 @@ export const TEAMS: readonly TeamIndex[] = [0, 1];
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-extrabold leading-none tracking-tight text-sea-100 ${className}`}>
-      Theopardy<span className="text-coral-400">!</span>
+      Theopardy<span className="text-ice-400">!</span>
     </span>
   );
 }
@@ -19,7 +19,7 @@ export function ScoreChips({ state, lead = null, size = 'md' }: { state: GameSta
       {TEAMS.map((team) => (
         <div
           key={team}
-          className={`tp-team-${team} flex items-center rounded-xl ${tv ? 'gap-[0.9vw] px-[1.4vw] py-[0.6vw]' : 'gap-3 px-4 py-2'} ${lead === team ? 'ring-4 ring-white' : ''}`}
+          className={`tp-team-${team} flex items-center rounded-xl ${tv ? 'gap-[0.9vw] px-[1.4vw] py-[0.6vw]' : 'gap-3 px-4 py-2'} ${lead === team ? 'ring-4 ring-ice-400 ring-offset-4 ring-offset-sea-950' : ''}`}
         >
           <span className={`font-semibold ${tv ? 'text-[clamp(0.9rem,1.35vw,1.6rem)]' : 'text-base'}`}>{state.config.teams[team].name}</span>
           <span className={`font-extrabold tabular-nums ${tv ? 'text-[clamp(1.3rem,2.4vw,2.8rem)]' : 'text-2xl'}`}>{state.scores[team].toLocaleString()}</span>

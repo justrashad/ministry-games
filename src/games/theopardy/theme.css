@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 /*
- * Theopardy!'s own look: deep navy ground, bright blue tiles with white numbers,
- * coral for actions and focus. Team 1 is coral, team 2 is mint. No gold anywhere.
+ * Theopardy!'s own look, in blue and white only: navy ground, bright blue tiles with
+ * white numbers, white for main actions. Team 1 is white, team 2 is light blue.
  */
 
 :root {
@@ -21,8 +21,8 @@
   }
   body {
     margin: 0;
-    background-color: #061a2e;
-    color: #eaf3ff;
+    background-color: #0a2152;
+    color: #ffffff;
     font-family: var(--tp-font);
     -webkit-font-smoothing: antialiased;
   }
@@ -33,11 +33,11 @@
     letter-spacing: -0.01em;
   }
   :focus-visible {
-    outline: 3px solid #ff8a5b;
+    outline: 3px solid #ffffff;
     outline-offset: 3px;
   }
   ::selection {
-    background: rgba(22, 104, 227, 0.55);
+    background: rgba(127, 178, 255, 0.45);
   }
 }
 
@@ -56,16 +56,16 @@
     @apply bg-sea-500 text-white hover:bg-sea-400;
   }
   .tp-btn-accent {
-    @apply bg-coral-400 text-coral-900 hover:bg-coral-300;
+    @apply bg-white text-sea-950 hover:bg-sea-200;
   }
   .tp-btn-ghost {
     @apply bg-sea-700 text-sea-100 hover:bg-sea-600;
   }
   .tp-btn-good {
-    @apply bg-mint-300 text-mint-900 hover:brightness-105;
+    @apply bg-white text-sea-950 hover:bg-sea-200;
   }
   .tp-btn-bad {
-    @apply border-2 border-coral-400 bg-transparent text-coral-300 hover:bg-coral-400/10;
+    @apply border-2 border-ice-300 bg-transparent text-ice-300 hover:bg-white/10;
   }
   .tp-btn-sm {
     @apply min-h-[44px] px-3.5 py-1.5 text-base;
@@ -109,12 +109,12 @@
  * classes it can't find written out in the code.
  */
 .tp-team-0 {
-  background-color: #ffd3b8;
-  color: #3b1503;
+  background-color: #ffffff;
+  color: #0a2152;
 }
 .tp-team-1 {
-  background-color: #8ef0d0;
-  color: #053527;
+  background-color: #9cc4ff;
+  color: #06235e;
 }
 
 @keyframes tp-pop {

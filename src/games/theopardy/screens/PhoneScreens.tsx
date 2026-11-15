@@ -52,7 +52,7 @@ export function JoinScreen() {
         />
       </div>
       {remote.error && (
-        <div className="rounded-xl border-2 border-coral-400 p-3 text-coral-300" role="alert">
+        <div className="rounded-xl border-2 border-ice-300 p-3 text-ice-300" role="alert">
           <p className="font-semibold">{t(remote.error, remote.errorVars)}</p>
           {remote.role === 'remote' && (
             <button type="button" className="tp-btn tp-btn-sm tp-btn-ghost mt-2" onClick={retryJoin}>

@@ -52,7 +52,7 @@ export function NewGameScreen() {
   return (
     <form className="flex flex-col gap-5" onSubmit={start}>
       <h1 className="text-4xl">{t('New game')}</h1>
-      {inProgress && <p className="rounded-xl border-2 border-coral-400 p-3 font-semibold text-coral-300">{t('A game is in progress. Starting a new one replaces it.')}</p>}
+      {inProgress && <p className="rounded-xl border-2 border-ice-300 p-3 font-semibold text-ice-300">{t('A game is in progress. Starting a new one replaces it.')}</p>}
 
       <div className="tp-panel grid gap-4 sm:grid-cols-2">
         {[0, 1].map((i) => (
@@ -98,12 +98,12 @@ export function NewGameScreen() {
       </div>
 
       <label className="flex items-center gap-3 text-lg font-semibold">
-        <input type="checkbox" className="h-6 w-6 accent-coral-400" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />
+        <input type="checkbox" className="h-6 w-6 accent-ice-400" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />
         {t('Open the game screen in a new window for the TV')}
       </label>
 
       {error && (
-        <p className="rounded-xl border-2 border-coral-400 p-3 font-semibold text-coral-300" role="alert">
+        <p className="rounded-xl border-2 border-ice-300 p-3 font-semibold text-ice-300" role="alert">
           {error}
         </p>
       )}

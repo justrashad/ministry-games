@@ -10,7 +10,7 @@ function QrCode({ text, label }: { text: string; label: string }) {
   useEffect(() => {
     let alive = true;
     import('qrcode')
-      .then((QR) => QR.toString(text, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#061A2E', light: '#FFFFFF' } }))
+      .then((QR) => QR.toString(text, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#0A2152', light: '#FFFFFF' } }))
       .then((markup) => alive && setSvg(markup))
       .catch(() => alive && setSvg(null));
     return () => {
@@ -62,7 +62,7 @@ export function RemotePanel() {
               <p className="mt-1 text-center font-semibold" role="status">
                 {status}
               </p>
-              {remote.error && <p className="mt-2 text-center text-sm text-coral-300">{t(remote.error, remote.errorVars)}</p>}
+              {remote.error && <p className="mt-2 text-center text-sm text-ice-300">{t(remote.error, remote.errorVars)}</p>}
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <button type="button" className="tp-btn tp-btn-sm tp-btn-ghost" onClick={() => void newRoomCode()}>
                   {t('New code')}

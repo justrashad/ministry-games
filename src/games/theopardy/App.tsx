@@ -69,7 +69,7 @@ export default function App() {
         <LangToggle />
       </header>
       {reconnecting && (
-        <p className="mb-4 rounded-xl border-2 border-coral-400 p-3 font-semibold text-coral-300" role="status">
+        <p className="mb-4 rounded-xl border-2 border-ice-300 p-3 font-semibold text-ice-300" role="status">
           {t('Reconnecting to the TV…')}
         </p>
       )}

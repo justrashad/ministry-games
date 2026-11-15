@@ -4,8 +4,8 @@ import { LEVELS, type ClueQuestion, type Level } from '../../../core/questions/t
 import { GAME_SCHEMA_VERSION, type Board, type GameConfig, type GameState, type TeamConfig, type Tile } from '../types';
 
 export const DEFAULT_TEAMS: [TeamConfig, TeamConfig] = [
-  { name: 'Team 1', color: 'sky' },
-  { name: 'Team 2', color: 'coral' },
+  { name: 'Team 1', color: 'white' },
+  { name: 'Team 2', color: 'ice' },
 ];
 
 export const DEFAULT_CONFIG: Omit<GameConfig, 'teams'> = {

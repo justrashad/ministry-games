@@ -128,7 +128,7 @@ export function GameScreen() {
                   {active.missed.length === 0 && <p className={`${NOTE} text-sea-300`}>{t('A wrong answer costs nothing.')}</p>}
                 </>
               ) : (
-                <p className={`${NOTE} text-coral-300`}>{t('Buzzers are open')}</p>
+                <p className={`${NOTE} text-ice-300`}>{t('Buzzers are open')}</p>
               )
             }
           >
@@ -184,7 +184,7 @@ export function GameScreen() {
     case 'finalClue':
       view = (
         <Frame state={state} middle={t('Final round')}>
-          <Card label={t('Final round')} footer={<p className={`${NOTE} text-coral-300`}>{t('Talk it over and write down your answer.')}</p>}>
+          <Card label={t('Final round')} footer={<p className={`${NOTE} text-ice-300`}>{t('Talk it over and write down your answer.')}</p>}>
             <p className={CLUE_TEXT}>{state.final?.clue.prompt}</p>
           </Card>
         </Frame>
