@@ -1,3 +1,4 @@
+import { useSoundLeader } from '../audio/hooks';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { BellRing, Maximize, Minimize, Pause, Smartphone, Volume2 } from 'lucide-react';
 import type { GameState, TeamIndex } from '../types';
@@ -53,8 +54,9 @@ export function GameScreen() {
   useEffect(() => {
     document.title = tt('Ministry Showdown | Game Screen');
   }, []);
-  useGameSounds(state, true);
-  useTimerDriver(state, true);
+  const lead = useSoundLeader('display');
+  useGameSounds(state, lead);
+  useTimerDriver(state, lead);
 
   useGameEvents(state, (event, s) => {
     if (event.kind === 'strike') {

@@ -1,3 +1,4 @@
+import { useSoundLeader } from '../../audio/hooks';
 import { t } from '../../i18n/i18n';
 import { useEffect, useState } from 'react';
 import { CircleHelp, Home, MonitorPlay, Pause, Play, Plus, Unplug, Volume2, VolumeX } from 'lucide-react';
@@ -28,8 +29,9 @@ export function HostScreen() {
     document.title = t('Ministry Showdown | Host Controls');
   }, []);
   // Sounds play on the TV window when it is open; otherwise here.
-  useGameSounds(state, !displayConnected);
-  useTimerDriver(state, !displayConnected);
+  const lead = useSoundLeader('host');
+  useGameSounds(state, lead);
+  useTimerDriver(state, lead);
   useHistoryRecorder(state);
   useHostShortcuts(state);
 

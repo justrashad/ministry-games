@@ -4,6 +4,8 @@ import { sound, type SoundName } from '../lib/sound';
 import { secondsLeft, timerRemaining } from '../engine/timer';
 import { dispatchGame } from '../sync/gameStore';
 import { useSettings } from '../state/settingsStore';
+import { useMusic } from '../audio/useGameAudio';
+import { OUTRO, THEME } from '../audio/themes';
 
 const EVENT_SOUNDS: Partial<Record<GameEvent['kind'], SoundName>> = {
   gameStart: 'gameStart',
@@ -60,6 +62,8 @@ export function useGameSounds(state: GameState | null, enabled: boolean): void {
     // The final strike also opens the steal: follow the strike sound with the steal cue.
     if (event.kind === 'strike' && s.phase === 'steal') window.setTimeout(() => sound.play('steal'), 900);
   });
+  const song = !state ? null : state.phase === 'intro' ? THEME : state.phase === 'gameOver' ? OUTRO : null;
+  useMusic(song, enabled && audio.enabled);
 }
 
 /**
