@@ -1,5 +1,7 @@
+import { CORE_ES } from '../../../core/i18n/es';
 import { registerTranslations } from '../../../core/i18n/i18n';
 import { ES } from './es';
 
-// Ministry Showdown's Spanish text. Imported once, before anything is shown.
+// Shared Spanish text first, then Ministry Showdown's own. Imported once, before anything is shown.
+registerTranslations('es', CORE_ES);
 registerTranslations('es', ES);

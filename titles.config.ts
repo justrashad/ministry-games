@@ -32,6 +32,16 @@ export const TITLES: Record<string, TitleInfo> = {
     themeColor: '#130d3d',
     backgroundColor: '#0b0828',
   },
+  theopardy: {
+    id: 'theopardy',
+    name: 'Theopardy!',
+    shortName: 'Theopardy!',
+    description: 'A Bible clue board game for two teams, designed for family worship.',
+    storagePrefix: 'theopardy:',
+    peerPrefix: 'theopardy-v1-',
+    themeColor: '#061A2E',
+    backgroundColor: '#061A2E',
+  },
 };
 
 export const DEFAULT_TITLE = 'showdown';

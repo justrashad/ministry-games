@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { env } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
@@ -20,6 +21,14 @@ export default defineConfig({
     __TITLE__: JSON.stringify(title),
   },
   plugins: [
+    {
+      // index.html is shared; each title supplies its own title, description and link-preview tags.
+      name: 'title-head',
+      transformIndexHtml: {
+        order: 'pre',
+        handler: (html: string) => html.replace('    <!--title:head-->\n', readFileSync(`${titleDir}/head.html`, 'utf8')),
+      },
+    },
     react(),
     VitePWA({
       // The app asks before updating so a new version never reloads mid-game.

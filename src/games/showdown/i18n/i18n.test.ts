@@ -18,7 +18,9 @@ function usedKeys(): Map<string, string> {
   const keys = new Map<string, string>();
   const pattern = /\b(?:t|tr|msg)\(\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
   const repo = join(__dirname, '..', '..', '..', '..');
-  for (const file of [...sourceFiles(join(repo, 'src')), ...sourceFiles(join(repo, 'server'))]) {
+  // This title's text plus the shared code it runs on. Other titles check their own.
+  const dirs = [join(repo, 'src', 'core'), join(repo, 'src', 'games', 'showdown'), join(repo, 'server', 'core'), join(repo, 'server', 'showdown')];
+  for (const file of dirs.flatMap(sourceFiles)) {
     const text = readFileSync(file, 'utf8');
     for (const m of text.matchAll(pattern)) {
       if (m[1] === '`' && m[2].includes('${')) continue;
