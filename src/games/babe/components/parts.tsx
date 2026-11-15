@@ -97,7 +97,7 @@ export function BoardView({ board, size, onPick, current }: { board: Board; size
                 </div>
               );
             }
-            const cls = `sb-open flex items-center justify-center text-center font-bold ${box} ${isCurrent ? 'sb-ring' : ''}`;
+            const cls = `sb-open sb-box-${(stage * slots.length + i) % 10} flex items-center justify-center text-center font-bold ${box} ${isCurrent ? 'sb-ring' : ''}`;
             return onPick ? (
               <button key={i} type="button" className={cls} onClick={() => onPick(stage, i)} aria-label={t('{stage}: {subject}', { stage: t(STAGE_NAMES[stage]), subject: slot.question.category })}>
                 {slot.question.category}

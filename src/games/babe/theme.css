@@ -32,6 +32,17 @@
   --sb-on-team-0: #ffffff;
   --sb-team-1: #0d9488;
   --sb-on-team-1: #ffffff;
+  /* The rainbow board: one color per question box, top left to bottom right. */
+  --sb-box-0: #dc2626;
+  --sb-box-1: #ea580c;
+  --sb-box-2: #d97706;
+  --sb-box-3: #16a34a;
+  --sb-box-4: #0d9488;
+  --sb-box-5: #0284c7;
+  --sb-box-6: #2563eb;
+  --sb-box-7: #4f46e5;
+  --sb-box-8: #9333ea;
+  --sb-box-9: #db2777;
   --sb-radius: 16px;
   --sb-font: 'Baloo 2 Variable', 'Baloo 2', system-ui, sans-serif;
 }
@@ -169,6 +180,26 @@
 .sb-team-1 {
   background-color: var(--sb-team-1);
   color: var(--sb-on-team-1);
+}
+
+/*
+ * Rainbow board boxes. Outside the Tailwind layers because screens build the class
+ * name from the box number (sb-box-0 to sb-box-9).
+ */
+.sb-box-0 { background-color: var(--sb-box-0); }
+.sb-box-1 { background-color: var(--sb-box-1); }
+.sb-box-2 { background-color: var(--sb-box-2); }
+.sb-box-3 { background-color: var(--sb-box-3); }
+.sb-box-4 { background-color: var(--sb-box-4); }
+.sb-box-5 { background-color: var(--sb-box-5); }
+.sb-box-6 { background-color: var(--sb-box-6); }
+.sb-box-7 { background-color: var(--sb-box-7); }
+.sb-box-8 { background-color: var(--sb-box-8); }
+.sb-box-9 { background-color: var(--sb-box-9); }
+[class*='sb-box-'] {
+  border-color: transparent;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 @keyframes sb-pop {
