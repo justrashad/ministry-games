@@ -29,11 +29,11 @@ export const STARTER_PACK_ES: CluePack = {
     clue('st-kings-2', KINGS, 2, 'Este hijo de David le pidió a Jehová sabiduría para juzgar al pueblo en vez de pedir riquezas.', 'Salomón', '1 Reyes 3:9-11'),
     clue('st-kings-3', KINGS, 3, 'El primer rey de Israel, un hombre alto de la tribu de Benjamín.', 'Saúl', '1 Samuel 9:1, 2; 10:1'),
     clue('st-kings-4', KINGS, 4, 'Empezó a reinar en Judá a los ocho años. Durante su reinado se encontró en el templo el libro de la Ley.', 'Josías', '2 Reyes 22:1, 8'),
-    clue('st-kings-5', KINGS, 5, 'Mientras este rey gobernaba Judá, un ángel mató a 185.000 soldados asirios en una sola noche.', 'Ezequías', '2 Reyes 19:35'),
+    clue('st-kings-5', KINGS, 5, 'Mientras este rey gobernaba Judá, un ángel mató a 185.000 soldados asirios en una sola noche.', 'Ezequías', '2 Reyes 19:15, 35'),
 
     clue('st-prophets-1', PROPHETS, 1, 'Pasó tres días y tres noches dentro de un pez enorme.', 'Jonás', 'Jonás 1:17'),
     clue('st-prophets-2', PROPHETS, 2, 'Lo echaron a un foso de leones porque siguió orándole a Jehová.', 'Daniel', 'Daniel 6:10, 16'),
-    clue('st-prophets-3', PROPHETS, 3, 'Un carro de fuego y caballos de fuego lo separaron de Eliseo, y subió en una tormenta de viento.', 'Elías', '2 Reyes 2:11'),
+    clue('st-prophets-3', PROPHETS, 3, 'Un carro de fuego y caballos de fuego lo separaron de Eliseo, y subió en una tempestad de viento.', 'Elías', '2 Reyes 2:11'),
     clue('st-prophets-4', PROPHETS, 4, 'Jehová le dijo a este profeta que se casara con una mujer llamada Gómer.', 'Oseas', 'Oseas 1:2, 3'),
     clue('st-prophets-5', PROPHETS, 5, 'En una visión vio una llanura llena de huesos secos que volvieron a la vida.', 'Ezequiel', 'Ezequiel 37:1-10'),
 
@@ -47,7 +47,7 @@ export const STARTER_PACK_ES: CluePack = {
     clue('st-jesus-2', JESUS, 2, 'Bautizó a Jesús en el río Jordán.', 'Juan el Bautista', 'Mateo 3:13', ['Juan', 'Juan el Bautizante']),
     clue('st-jesus-3', JESUS, 3, 'En un banquete de boda en Caná, Jesús hizo su primer milagro al convertir agua en esto.', 'Vino', 'Juan 2:1-11'),
     clue('st-jesus-4', JESUS, 4, 'Jesús resucitó a este amigo cuando ya llevaba cuatro días en la tumba.', 'Lázaro', 'Juan 11:17, 43, 44'),
-    clue('st-jesus-5', JESUS, 5, 'El lugar donde Jesús oró con sus discípulos cerca la noche en que lo arrestaron.', 'Getsemaní', 'Mateo 26:36'),
+    clue('st-jesus-5', JESUS, 5, 'El lugar donde Jesús oró, con sus discípulos cerca, la noche en que lo arrestaron.', 'Getsemaní', 'Mateo 26:36'),
 
     clue('st-apostles-1', APOSTLES, 1, 'Bajó de la barca y caminó sobre el agua hacia Jesús.', 'Pedro', 'Mateo 14:29', ['Simón Pedro', 'Cefas']),
     clue('st-apostles-2', APOSTLES, 2, 'Traicionó a Jesús por 30 piezas de plata.', 'Judas Iscariote', 'Mateo 26:14-16', ['Judas']),
@@ -63,15 +63,15 @@ export const STARTER_PACK_ES: CluePack = {
 
     clue('st-animals-1', ANIMALS, 1, 'En el jardín de Edén, este animal le habló a Eva.', 'Una serpiente', 'Génesis 3:1', ['Serpiente', 'La serpiente', 'Una culebra']),
     clue('st-animals-2', ANIMALS, 2, 'Esta ave volvió al arca de Noé con una hoja de olivo.', 'Una paloma', 'Génesis 8:11', ['Paloma', 'La paloma']),
-    clue('st-animals-3', ANIMALS, 3, 'Estas aves le llevaban pan y carne a Elías mientras estaba junto al valle de Kerit.', 'Cuervos', '1 Reyes 17:6', ['Los cuervos']),
+    clue('st-animals-3', ANIMALS, 3, 'Estas aves le llevaban pan y carne a Elías mientras estaba junto al valle de Kerit.', 'Cuervos', '1 Reyes 17:3-6', ['Los cuervos']),
     clue('st-animals-4', ANIMALS, 4, 'Este animal le habló a Balaam después de que él lo golpeó tres veces.', 'Una burra', 'Números 22:28', ['Burra', 'Un burro', 'Una asna', 'Un asno']),
-    clue('st-animals-5', ANIMALS, 5, 'Sansón atrapó 300 de estos animales y les ató antorchas entre las colas.', 'Zorras', 'Jueces 15:4', ['Zorros']),
+    clue('st-animals-5', ANIMALS, 5, 'Sansón atrapó 300 de estos animales y les ató antorchas entre las colas.', 'Zorros', 'Jueces 15:4', ['Zorras']),
 
     clue('st-exodus-1', EXODUS, 1, 'Cuando era bebé lo pusieron en una canasta entre los juncos del río Nilo.', 'Moisés', 'Éxodo 2:3-10'),
-    clue('st-exodus-2', EXODUS, 2, 'El hermano de Moisés, que habló por él ante el faraón.', 'Aarón', 'Éxodo 4:14-16'),
+    clue('st-exodus-2', EXODUS, 2, 'El hermano de Moisés, que habló por él ante el faraón.', 'Aarón', 'Éxodo 4:14-16; 7:1, 2'),
     clue('st-exodus-3', EXODUS, 3, 'Jehová dividió este mar para que Israel cruzara por suelo seco.', 'El mar Rojo', 'Éxodo 14:21, 22', ['Mar Rojo']),
     clue('st-exodus-4', EXODUS, 4, 'El alimento que Jehová le dio a Israel durante 40 años en el desierto.', 'Maná', 'Éxodo 16:31, 35', ['El maná']),
-    clue('st-exodus-5', EXODUS, 5, 'El suegro de Moisés, que le aconsejó elegir hombres capaces para que lo ayudaran a juzgar al pueblo.', 'Jetró', 'Éxodo 18:17-21', ['Reuel']),
+    clue('st-exodus-5', EXODUS, 5, 'El suegro de Moisés, que le aconsejó elegir hombres capaces para que lo ayudaran a juzgar al pueblo.', 'Jetró', 'Éxodo 18:1, 17-21', ['Reuel']),
 
     clue('st-books-1', BOOKS, 1, 'El primer libro de la Biblia.', 'Génesis'),
     clue('st-books-2', BOOKS, 2, 'El último libro de la Biblia.', 'Apocalipsis', undefined, ['Revelación']),
@@ -92,10 +92,10 @@ export const STARTER_PACK_ES: CluePack = {
     clue('st-family-5', FAMILY, 5, 'La abuela de Timoteo, recordada por su fe.', 'Loida', '2 Timoteo 1:5'),
 
     clue('st-early-1', EARLY, 1, 'El nombre por el que se conocía al apóstol Pablo cuando perseguía a la congregación.', 'Saulo', 'Hechos 8:3; 13:9', ['Saulo de Tarso']),
-    clue('st-early-2', EARLY, 2, 'Lo mataron a pedradas después de dar un testimonio valiente ante el Sanedrín.', 'Esteban', 'Hechos 7:59, 60'),
+    clue('st-early-2', EARLY, 2, 'Lo mataron a pedradas después de dar un testimonio valiente ante el Sanedrín.', 'Esteban', 'Hechos 6:12, 15; 7:59, 60'),
     clue('st-early-3', EARLY, 3, 'También llamada Dorcas, esta discípula de Jope fue resucitada por Pedro.', 'Tabita', 'Hechos 9:36-41'),
     clue('st-early-4', EARLY, 4, 'Un oficial del ejército en Cesarea. Pedro fue enviado a su casa, y él y los de su casa se bautizaron.', 'Cornelio', 'Hechos 10:1, 24, 48'),
-    clue('st-early-5', EARLY, 5, 'Este matrimonio fabricaba tiendas de campaña y trabajó con Pablo en Corinto. Di los dos nombres.', 'Áquila y Priscila', 'Hechos 18:2, 3', ['Priscila y Áquila', 'Áquila y Prisca', 'Prisca y Áquila']),
+    clue('st-early-5', EARLY, 5, 'Este matrimonio fabricaba tiendas de campaña y trabajó con Pablo en Corinto. Di los dos nombres.', 'Áquila y Priscila', 'Hechos 18:1-3', ['Priscila y Áquila', 'Áquila y Prisca', 'Prisca y Áquila']),
   ],
   finals: [
     clue('st-final-1', FINAL, 5, 'Vivió 969 años, más que cualquier otra persona de la que habla la Biblia.', 'Matusalén', 'Génesis 5:27'),
