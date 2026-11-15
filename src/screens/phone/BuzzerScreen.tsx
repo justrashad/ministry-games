@@ -3,7 +3,7 @@ import type { TeamIndex } from '../../types';
 import { TEAM_COLORS } from '../../engine/defaults';
 import { buzzersOpen } from '../../engine/game';
 import { useGameState } from '../../sync/gameStore';
-import { sendRemoteAction } from '../../sync/remote';
+import { sendRemoteAction } from '../../sync/gameStore';
 import { PhoneFrame } from './PhoneFrame';
 import { useT } from '../../i18n/i18n';
 

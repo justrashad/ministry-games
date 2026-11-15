@@ -2,8 +2,7 @@ import { useSyncExternalStore } from 'react';
 import type { DataConnection, Peer as PeerInstance, PeerOptions } from 'peerjs';
 import { readRaw, writeRaw } from '../lib/storage';
 import type { Transport } from './channel';
-import { sanitizeMessage, type RemoteAction } from './envelope';
-import { receiveSyncMessage, registerTransport, setAcceptRemoteActions, WINDOW_ORIGIN } from './gameStore';
+import { activeStore } from './createGameStore';
 import { msg } from '../i18n/i18n';
 import { generateRoomCode, isValidRoomCode, normalizeRoomCode, peerIdForRoom } from './roomCode';
 
@@ -111,7 +110,7 @@ function attach(conn: DataConnection, onGone: () => void): Attached {
   };
   let lastSeen = Date.now();
   let done = false;
-  const unregister = registerTransport(transport);
+  const unregister = activeStore().registerTransport(transport);
   const finish = () => {
     if (done) return;
     done = true;
@@ -133,8 +132,9 @@ function attach(conn: DataConnection, onGone: () => void): Attached {
   }, PING_MS);
   conn.on('data', (raw: unknown) => {
     lastSeen = Date.now();
-    const message = sanitizeMessage(raw);
-    if (message) receiveSyncMessage(message, transport);
+    const store = activeStore();
+    const message = store.sanitizeMessage(raw);
+    if (message) store.receiveSyncMessage(message, transport);
   });
   conn.on('close', finish);
   conn.on('error', finish);
@@ -238,7 +238,7 @@ export async function startRoom(): Promise<void> {
   if (status.role === 'remote') leaveRoom();
   const code = roomCode();
   writeRaw(`${ROOM_KEY}-on`, '1', true);
-  setAcceptRemoteActions(true);
+  activeStore().setAcceptRemoteActions(true);
   setStatus({ role: 'room', phase: 'starting', code, phones: 0, error: null });
   let Peer: PeerConstructor;
   try {
@@ -252,7 +252,7 @@ export async function startRoom(): Promise<void> {
 
 export function stopRoom(): void {
   writeRaw(`${ROOM_KEY}-on`, '0', true);
-  setAcceptRemoteActions(false);
+  activeStore().setAcceptRemoteActions(false);
   clearTimers();
   roomConnections.forEach((c) => c.close());
   roomConnections.clear();
@@ -326,7 +326,7 @@ function connectToRoom(): void {
       scheduleReconnect();
     });
     // Ask the TV for its game. Its reply replaces whatever this phone had stored.
-    remoteLink.transport.post({ type: 'hello', origin: WINDOW_ORIGIN, wantsSync: true });
+    remoteLink.transport.post({ type: 'hello', origin: activeStore().origin, wantsSync: true });
     setStatus({ phase: 'connected', error: null });
   });
 }
@@ -408,8 +408,11 @@ export function getPhoneRole(): PhoneRole | null {
   }
 }
 
-/** Sends a buzz or a Final Challenge answer to the TV. Returns false when not connected. */
-export function sendRemoteAction(action: RemoteAction): boolean {
+/**
+ * Sends a phone's request (a buzz, an answer) to the TV. Returns false when not connected.
+ * Each title wraps this with its own typed helper; the TV validates whatever arrives.
+ */
+export function sendRemoteRequest(action: unknown): boolean {
   if (status.role !== 'remote' || status.phase !== 'connected' || !remoteLink) return false;
   remoteLink.transport.post({ type: 'action', action });
   return true;

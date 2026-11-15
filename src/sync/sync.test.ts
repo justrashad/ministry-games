@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { isNewer, mergeEnvelope, sanitizeEnvelope, sanitizeMessage, type GameEnvelope } from './envelope';
+import { createCodec, isNewer, mergeEnvelope, type GameEnvelope } from './envelope';
+import { showdownDefinition } from '../engine/syncDefinition';
+import type { GameState } from '../types';
 import { formatRoomCode, generateRoomCode, isValidRoomCode, normalizeRoomCode, peerIdForRoom, ROOM_ALPHABET } from './roomCode';
 import { mulberry32 } from '../engine/random';
 import { startGame, makeQuestion } from '../engine/testUtils';
 
 const game = startGame([makeQuestion('q1', [10, 5])]);
-const env = (rev: number, origin: string, state = game): GameEnvelope => ({ rev, origin, state });
+const { sanitizeEnvelope, sanitizeMessage } = createCodec(showdownDefinition);
+const env = (rev: number, origin: string, state = game): GameEnvelope<GameState> => ({ rev, origin, state });
 
 describe('envelope merging', () => {
   it('adopts higher revisions and ignores older ones', () => {

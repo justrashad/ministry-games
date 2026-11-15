@@ -1,4 +1,4 @@
-import { sanitizeMessage, type SyncMessage } from './envelope';
+import type { SyncMessage } from './envelope';
 
 export type { GameEnvelope, SyncMessage } from './envelope';
 
@@ -13,8 +13,11 @@ export interface LocalChannel extends Transport {
   subscribe(listener: (message: SyncMessage) => void): () => void;
 }
 
-/** BroadcastChannel when available; otherwise a no-op channel (the store falls back to storage events + polling). */
-export function createLocalChannel(name = 'survey-showdown-sync'): LocalChannel {
+/**
+ * BroadcastChannel when available; otherwise a no-op channel (the store falls back to storage events + polling).
+ * The title's store passes its channel name and its message validator.
+ */
+export function createLocalChannel(name: string, sanitizeMessage: (raw: unknown) => SyncMessage | null): LocalChannel {
   if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
     try {
       const bc = new BroadcastChannel(name);

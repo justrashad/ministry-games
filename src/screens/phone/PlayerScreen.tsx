@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { CheckCircle2, EyeOff, Hourglass } from 'lucide-react';
 import type { PlayerIndex } from '../../types';
 import { useGameState } from '../../sync/gameStore';
-import { sendRemoteAction } from '../../sync/remote';
+import { sendRemoteAction } from '../../sync/gameStore';
 import { TimerDisplay } from '../../components/game/TimerDisplay';
 import { FcAnswerInput } from '../final/FcAnswerInput';
 import { PhoneFrame } from './PhoneFrame';
