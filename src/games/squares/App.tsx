@@ -31,7 +31,7 @@ function Screen({ route }: { route: Route }) {
       return (
         <>
           <GameScreen />
-          <SoundCorner role="display" buttonClass="ks-btn ks-btn-sm ks-btn-ghost" promptClass="ks-btn ks-btn-primary animate-pulse" />
+          <SoundCorner role="display" className="fixed bottom-2 left-[2vw] z-40 flex items-center gap-2" buttonClass="ks-btn ks-btn-sm ks-btn-ghost" promptClass="ks-btn ks-btn-primary animate-pulse" />
         </>
       );
     case '/join':
