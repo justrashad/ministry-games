@@ -29,7 +29,7 @@ export const STARTER_PACK: CluePack = {
   description: 'Twelve categories for the whole family, from well-known accounts to deeper study.',
   clues: [
     clue('st-kings-1', KINGS, 1, 'As a shepherd boy he defeated the giant Goliath, and he later became king.', 'David', '1 Samuel 17:49, 50'),
-    clue('st-kings-2', KINGS, 2, 'This son of David asked Jehovah for wisdom to judge the people instead of asking for riches.', 'Solomon', '1 Kings 3:9-11'),
+    clue('st-kings-2', KINGS, 2, 'This son of David asked Jehovah for an obedient heart to judge the people instead of asking for riches.', 'Solomon', '1 Kings 3:9-11'),
     clue('st-kings-3', KINGS, 3, 'The first king of Israel, a tall man from the tribe of Benjamin.', 'Saul', '1 Samuel 9:1, 2; 10:1'),
     clue('st-kings-4', KINGS, 4, 'He became king of Judah at eight years old. During his reign the book of the Law was found in the temple.', 'Josiah', '2 Kings 22:1, 8'),
     clue('st-kings-5', KINGS, 5, 'While this king ruled Judah, an angel struck down 185,000 Assyrian soldiers in one night.', 'Hezekiah', '2 Kings 19:15, 35'),
@@ -48,18 +48,18 @@ export const STARTER_PACK: CluePack = {
 
     clue('st-jesus-1', JESUS, 1, 'The town where Jesus was born.', 'Bethlehem', 'Matthew 2:1'),
     clue('st-jesus-2', JESUS, 2, 'He baptized Jesus in the Jordan River.', 'John the Baptist', 'Matthew 3:13', ['John', 'John the Baptizer']),
-    clue('st-jesus-3', JESUS, 3, 'At a wedding feast in Cana, Jesus performed his first miracle by turning water into this.', 'Wine', 'John 2:1-11'),
+    clue('st-jesus-3', JESUS, 3, 'At a marriage feast in Cana, Jesus performed the first of his signs by turning water into this.', 'Wine', 'John 2:1-11'),
     clue('st-jesus-4', JESUS, 4, 'Jesus resurrected this friend after he had been in the tomb for four days.', 'Lazarus', 'John 11:17, 43, 44'),
     clue('st-jesus-5', JESUS, 5, 'The place where Jesus prayed with his disciples nearby on the night he was arrested.', 'Gethsemane', 'Matthew 26:36'),
 
     clue('st-apostles-1', APOSTLES, 1, 'He got out of the boat and walked on the water toward Jesus.', 'Peter', 'Matthew 14:29', ['Simon Peter', 'Cephas']),
     clue('st-apostles-2', APOSTLES, 2, 'He betrayed Jesus for 30 silver pieces.', 'Judas Iscariot', 'Matthew 26:14-16', ['Judas']),
     clue('st-apostles-3', APOSTLES, 3, 'He was sitting at the tax office when Jesus called him to be a follower.', 'Matthew', 'Matthew 9:9', ['Levi']),
-    clue('st-apostles-4', APOSTLES, 4, 'He said he would not believe Jesus had been raised unless he saw and touched the marks of the nails.', 'Thomas', 'John 20:24, 25'),
+    clue('st-apostles-4', APOSTLES, 4, 'He said he would not believe Jesus had been raised unless he saw and touched the print of the nails.', 'Thomas', 'John 20:24, 25'),
     clue('st-apostles-5', APOSTLES, 5, 'He was chosen by lot to take the place of Judas Iscariot.', 'Matthias', 'Acts 1:26'),
 
     clue('st-places-1', PLACES, 1, 'The garden where Adam and Eve first lived.', 'Eden', 'Genesis 2:8', ['The garden of Eden']),
-    clue('st-places-2', PLACES, 2, 'The walls of this city fell flat after Israel marched around it for seven days.', 'Jericho', 'Joshua 6:15, 20'),
+    clue('st-places-2', PLACES, 2, 'The wall of this city fell down flat after Israel marched around it for seven days.', 'Jericho', 'Joshua 6:15, 20'),
     clue('st-places-3', PLACES, 3, 'The mountain where Moses received the Ten Commandments.', 'Mount Sinai', 'Exodus 19:20; 31:18', ['Sinai', 'Horeb', 'Mount Horeb']),
     clue('st-places-4', PLACES, 4, 'In this city the disciples were first called Christians.', 'Antioch', 'Acts 11:26', ['Antioch of Syria']),
     clue('st-places-5', PLACES, 5, 'The apostle John was on this island when he received the Revelation.', 'Patmos', 'Revelation 1:9'),
@@ -70,7 +70,7 @@ export const STARTER_PACK: CluePack = {
     clue('st-animals-4', ANIMALS, 4, 'This animal spoke to Balaam after he struck it three times.', 'A donkey', 'Numbers 22:28', ['Donkey', 'A female donkey', 'An ass']),
     clue('st-animals-5', ANIMALS, 5, 'Samson caught 300 of these animals and tied torches between their tails.', 'Foxes', 'Judges 15:4'),
 
-    clue('st-exodus-1', EXODUS, 1, 'As a baby he was placed in a basket among the reeds of the Nile River.', 'Moses', 'Exodus 2:3-10'),
+    clue('st-exodus-1', EXODUS, 1, 'As a baby he was placed in a basket among the reeds by the bank of the Nile River.', 'Moses', 'Exodus 2:3-10'),
     clue('st-exodus-2', EXODUS, 2, 'The brother of Moses, who spoke for him before Pharaoh.', 'Aaron', 'Exodus 4:14-16; 7:1, 2'),
     clue('st-exodus-3', EXODUS, 3, 'Jehovah parted this sea so that Israel could cross on dry ground.', 'The Red Sea', 'Exodus 14:21, 22', ['Red Sea']),
     clue('st-exodus-4', EXODUS, 4, 'The food Jehovah provided for Israel during 40 years in the wilderness.', 'Manna', 'Exodus 16:31, 35'),
