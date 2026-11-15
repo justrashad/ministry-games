@@ -1,10 +1,12 @@
-import type { ReactNode } from 'react';
+import { useSoundLeader } from '../../../core/audio/hooks';
+import { startDisplayPresence } from '../../../core/sync/presence';
+import { useEffect, type ReactNode } from 'react';
 import { BookOpen } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
 import { RemotePanel } from '../components/RemotePanel';
 import { BoardView, boxColor, formatSeconds, HelpChips, Ladders, RainbowStripes, RainbowWord, STAGE_NAMES, TEAMS, useSecondsLeft, Wordmark } from '../components/parts';
 import { activeQuestion, gameWinner, rungs } from '../engine/game';
-import { useGameSounds, useKeyboardJudge, useUnlockSound } from '../hooks/useGameEffects';
+import { useGameSounds, useKeyboardJudge } from '../hooks/useGameEffects';
 import { useGameState } from '../sync/gameStore';
 import type { GameState, TeamIndex } from '../types';
 
@@ -64,8 +66,9 @@ function Lookup({ reference, until }: { reference?: string; until: number | null
 export function GameScreen() {
   const t = useT();
   const state = useGameState();
-  useGameSounds(state);
-  useUnlockSound();
+  const lead = useSoundLeader('display');
+  useEffect(() => startDisplayPresence(), []);
+  useGameSounds(state, lead, true);
   useKeyboardJudge();
 
   if (!state) {

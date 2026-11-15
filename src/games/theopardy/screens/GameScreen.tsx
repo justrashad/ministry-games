@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react';
+import { useSoundLeader } from '../../../core/audio/hooks';
+import { startDisplayPresence } from '../../../core/sync/presence';
+import { useEffect, type ReactNode } from 'react';
 import { useT } from '../../../core/i18n/i18n';
 import { RemotePanel } from '../components/RemotePanel';
 import { ScoreChips, TEAMS, Wordmark } from '../components/parts';
 import { activeTile, currentBoard, gameWinner, isLastRound } from '../engine/game';
-import { useGameSounds, useKeyboardBuzzers, useUnlockSound } from '../hooks/useGameEffects';
+import { useGameSounds, useKeyboardBuzzers } from '../hooks/useGameEffects';
 import { useGameState } from '../sync/gameStore';
 import type { GameState, TeamIndex } from '../types';
 
@@ -70,8 +72,9 @@ function TeamBanner({ team, text }: { team: TeamIndex; text: string }) {
 export function GameScreen() {
   const t = useT();
   const state = useGameState();
-  useGameSounds(state);
-  useUnlockSound();
+  const lead = useSoundLeader('display');
+  useEffect(() => startDisplayPresence(), []);
+  useGameSounds(state, lead, true);
   useKeyboardBuzzers();
 
   if (!state) {

@@ -1,7 +1,10 @@
 /**
- * Original, generated UI sounds using the Web Audio API. No audio files and no
- * borrowed game-show sounds. Everything is a no-op if audio is unsupported.
+ * Ministry Showdown's sound effects, synthesized live (see core/audio). No audio
+ * files and no borrowed game-show sounds. Everything is a no-op if audio is unsupported.
  */
+import { audio } from '../audio/engine';
+import { boom, chord, drum, hz, note, run, sparkle, whoosh } from '../audio/instruments';
+import { DRY, playKit, SFX, WET, type SoundKit } from '../audio/sfx';
 
 export type SoundName =
   | 'gameStart'
@@ -20,161 +23,109 @@ export type SoundName =
   | 'celebrate'
   | 'buzz';
 
-type Wave = OscillatorType;
+const GLITTER = ['C6', 'E6', 'G6', 'A6', 'C7', 'E7'].map(hz);
 
-class SoundEngine {
-  private ctx: AudioContext | null = null;
-  private master: GainNode | null = null;
-  private volume = 0.6;
-  private supported: boolean;
-  private listeners = new Set<() => void>();
+function fanfare(t: number, big: boolean): void {
+  drum('crash', SFX, t, big ? 0.9 : 0.6);
+  drum('kick', SFX, t, 0.9);
+  chord('brass', SFX, t, ['F4', 'A4', 'C5'], 0.16, 0.9);
+  chord('brass', SFX, t + 0.18, ['F4', 'A4', 'C5'], 0.12, 0.8);
+  chord('brass', SFX, t + 0.32, ['G4', 'Bb4', 'D5'], 0.14, 0.85);
+  chord('brass', WET, t + 0.5, ['A4', 'C5', 'F5'], big ? 1.2 : 0.7, 1);
+  note('bass', SFX, t + 0.5, hz('F2'), big ? 1.1 : 0.6, 0.9);
+  drum('crash', WET, t + 0.5, 0.7);
+  sparkle(WET, t + 0.55, big ? 14 : 7, GLITTER, big ? 1.2 : 0.6, 0.5);
+}
 
-  constructor() {
-    this.supported =
-      typeof window !== 'undefined' &&
-      (typeof window.AudioContext !== 'undefined' ||
-        typeof (window as unknown as { webkitAudioContext?: unknown }).webkitAudioContext !== 'undefined');
-  }
+const KIT: SoundKit<SoundName> = {
+  gameStart: (t) => {
+    whoosh(SFX, t, 0.45, 300, 5000, 0.5);
+    fanfare(t + 0.35, true);
+  },
+  roundStart: (t) => {
+    whoosh(SFX, t, 0.35, 400, 4500, 0.45);
+    [0, 0.07, 0.14, 0.21].forEach((d, i) => drum('snare', DRY, t + 0.2 + d, 0.4 + i * 0.12));
+    chord('brass', WET, t + 0.5, ['C5', 'E5', 'G5'], 0.5, 0.9);
+    drum('crash', WET, t + 0.5, 0.6);
+  },
+  finalRound: (t) => {
+    for (let i = 0; i < 10; i++) drum('tom', DRY, t + i * 0.06, 0.25 + i * 0.06);
+    chord('brass', WET, t + 0.65, ['D4', 'F#4', 'A4', 'D5'], 1.4, 1);
+    boom(SFX, t + 0.65, 0.9);
+    sparkle(WET, t + 0.8, 10, GLITTER, 1, 0.45);
+  },
+  reveal: (t) => {
+    note('bell', WET, t, hz('A5'), 0.3, 0.9);
+    note('bell', WET, t + 0.08, hz('E6'), 0.4, 0.7);
+    note('glock', SFX, t + 0.16, hz('A6'), 0.2, 0.5);
+  },
+  correct: (t) => {
+    run('bell', WET, t, ['E5', 'A5', 'C#6', 'E6'], 0.065, 0.35, 0.85);
+    drum('clap', SFX, t + 0.2, 0.5);
+    sparkle(WET, t + 0.25, 4, GLITTER, 0.3, 0.4);
+  },
+  strike: (t) => {
+    // A deep, round "bwomp" rather than a harsh buzzer.
+    note('brass', SFX, t, hz('Eb3'), 0.22, 0.9, { glideTo: hz('C3') });
+    note('brass', SFX, t + 0.24, hz('B2'), 0.5, 0.9);
+    note('bass', SFX, t, hz('Eb2'), 0.7, 0.9);
+    drum('kick', SFX, t, 0.7);
+  },
+  steal: (t) => {
+    whoosh(SFX, t, 0.9, 200, 6000, 0.6);
+    note('lead', SFX, t, hz('A3'), 0.8, 0.7, { glideTo: hz('A4') });
+    [0.2, 0.4, 0.6, 0.75].forEach((d) => drum('tom', DRY, t + d, 0.55));
+    chord('strings', WET, t + 0.85, ['D4', 'F4', 'A4'], 0.8, 0.9);
+  },
+  stealSuccess: (t) => fanfare(t, false),
+  roundWin: (t) => fanfare(t, false),
+  tick: (t) => note('marimba', DRY, t, hz('C7'), 0.05, 0.55),
+  timeUp: (t) => {
+    note('brass', SFX, t, hz('G4'), 0.2, 0.9);
+    note('brass', SFX, t + 0.22, hz('C4'), 0.6, 0.9);
+    boom(SFX, t + 0.22, 0.6);
+  },
+  submit: (t) => note('pluck', SFX, t, hz('E6'), 0.08, 0.6),
+  miss: (t) => {
+    note('marimba', SFX, t, hz('E4'), 0.2, 0.7);
+    note('marimba', SFX, t + 0.12, hz('C4'), 0.4, 0.7);
+  },
+  buzz: (t) => {
+    whoosh(DRY, t, 0.18, 2000, 7000, 0.4);
+    note('bell', WET, t, hz('B5'), 0.15, 1);
+    note('bell', WET, t + 0.11, hz('E6'), 0.4, 1);
+    note('lead', SFX, t, hz('E5'), 0.25, 0.6);
+  },
+  celebrate: (t) => {
+    [0, 0.08, 0.16, 0.24, 0.32, 0.4].forEach((d, i) => drum(i % 2 ? 'snare' : 'tom', DRY, t + d, 0.5 + i * 0.07));
+    fanfare(t + 0.48, true);
+    run('glock', WET, t + 1.3, ['F5', 'A5', 'C6', 'F6', 'A6', 'C7'], 0.06, 0.3, 0.6);
+    drum('crash', WET, t + 1.7, 0.8);
+    chord('brass', WET, t + 1.7, ['F4', 'A4', 'C5', 'F5'], 1.4, 1);
+    sparkle(WET, t + 1.75, 18, GLITTER, 1.6, 0.5);
+  },
+};
 
+class SoundFacade {
   isSupported(): boolean {
-    return this.supported;
+    return audio.isSupported();
   }
-
-  private ensure(): AudioContext | null {
-    if (!this.supported) return null;
-    if (this.ctx) return this.ctx;
-    try {
-      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      this.ctx = new Ctor();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = this.volume;
-      this.master.connect(this.ctx.destination);
-      this.ctx.onstatechange = () => this.listeners.forEach((l) => l());
-      return this.ctx;
-    } catch {
-      this.supported = false;
-      return null;
-    }
-  }
-
-  /** True when the browser is waiting for a click before it will play audio. */
   isLocked(): boolean {
-    const ctx = this.ensure();
-    return !!ctx && ctx.state === 'suspended';
+    return audio.isLocked();
   }
-
   onStateChange(listener: () => void): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
+    return audio.onStateChange(listener);
   }
-
-  async unlock(): Promise<void> {
-    const ctx = this.ensure();
-    if (ctx && ctx.state === 'suspended') {
-      try {
-        await ctx.resume();
-      } catch {
-        /* ignore */
-      }
-    }
-    this.listeners.forEach((l) => l());
+  unlock(): Promise<void> {
+    return audio.unlock();
   }
-
+  /** Effects volume. */
   setVolume(volume: number): void {
-    this.volume = Math.min(1, Math.max(0, volume));
-    if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.02);
+    audio.setVolume('sfx', volume);
   }
-
-  private tone(freq: number, start: number, duration: number, wave: Wave = 'sine', gain = 0.25, endFreq?: number): void {
-    const ctx = this.ctx;
-    const master = this.master;
-    if (!ctx || !master) return;
-    const osc = ctx.createOscillator();
-    const env = ctx.createGain();
-    osc.type = wave;
-    osc.frequency.setValueAtTime(freq, start);
-    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, start + duration);
-    env.gain.setValueAtTime(0.0001, start);
-    env.gain.exponentialRampToValueAtTime(gain, start + 0.012);
-    env.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    osc.connect(env);
-    env.connect(master);
-    osc.start(start);
-    osc.stop(start + duration + 0.05);
-  }
-
-  private arpeggio(notes: number[], start: number, step: number, duration: number, wave: Wave, gain: number): void {
-    notes.forEach((n, i) => this.tone(n, start + i * step, duration, wave, gain));
-  }
-
   play(name: SoundName): void {
-    const ctx = this.ensure();
-    if (!ctx) return;
-    if (ctx.state === 'suspended') {
-      void ctx.resume().catch(() => undefined);
-    }
-    const t = ctx.currentTime + 0.02;
-    switch (name) {
-      case 'gameStart':
-        this.arpeggio([523.25, 659.25, 783.99, 1046.5], t, 0.11, 0.35, 'triangle', 0.22);
-        break;
-      case 'roundStart':
-        this.arpeggio([587.33, 880], t, 0.13, 0.3, 'triangle', 0.2);
-        break;
-      case 'finalRound':
-        [261.63, 329.63, 392, 523.25].forEach((f) => this.tone(f, t, 1.3, 'triangle', 0.12));
-        this.tone(1046.5, t + 0.35, 0.8, 'sine', 0.1);
-        break;
-      case 'reveal':
-        this.tone(880, t, 0.16, 'sine', 0.22);
-        this.tone(1318.5, t + 0.08, 0.28, 'sine', 0.18);
-        break;
-      case 'correct':
-        this.arpeggio([659.25, 880, 1108.7], t, 0.07, 0.28, 'triangle', 0.22);
-        break;
-      case 'strike':
-        // A soft, low "bonk" rather than a harsh buzzer.
-        this.tone(196, t, 0.42, 'square', 0.07, 130);
-        this.tone(98, t, 0.45, 'sine', 0.28, 80);
-        break;
-      case 'steal':
-        this.tone(330, t, 0.45, 'triangle', 0.2, 880);
-        this.tone(440, t + 0.2, 0.45, 'triangle', 0.16, 1175);
-        break;
-      case 'stealSuccess':
-      case 'roundWin':
-        this.arpeggio([523.25, 659.25, 783.99], t, 0.1, 0.25, 'triangle', 0.2);
-        this.tone(1046.5, t + 0.3, 0.6, 'triangle', 0.22);
-        break;
-      case 'tick':
-        this.tone(1046.5, t, 0.07, 'sine', 0.16);
-        break;
-      case 'timeUp':
-        this.tone(784, t, 0.22, 'triangle', 0.22);
-        this.tone(523.25, t + 0.2, 0.45, 'triangle', 0.22);
-        break;
-      case 'submit':
-        this.tone(740, t, 0.1, 'sine', 0.16);
-        break;
-      case 'miss':
-        this.tone(311, t, 0.3, 'sine', 0.18, 262);
-        break;
-      case 'buzz':
-        // A bright two-tone "ding-ding" for the first buzz.
-        this.tone(988, t, 0.18, 'square', 0.09);
-        this.tone(1319, t + 0.12, 0.3, 'square', 0.09);
-        this.tone(1319, t + 0.12, 0.3, 'sine', 0.18);
-        break;
-      case 'celebrate':
-        this.arpeggio([523.25, 659.25, 783.99, 1046.5, 1318.5], t, 0.09, 0.4, 'triangle', 0.18);
-        this.tone(1568, t + 0.5, 0.8, 'sine', 0.12);
-        break;
-      default:
-        break;
-    }
+    playKit(KIT, name);
   }
 }
 
-export const sound = new SoundEngine();
+export const sound = new SoundFacade();

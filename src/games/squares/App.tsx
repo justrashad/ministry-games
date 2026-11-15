@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { SoundCorner } from '../../core/audio/SoundCorner';
 import { useApplyLangAttribute, useT } from '../../core/i18n/i18n';
 import { resumeRemoteSession, useRemoteStatus } from '../../core/sync/remote';
 import { TITLE } from '../../core/title';
@@ -20,9 +21,19 @@ function Screen({ route }: { route: Route }) {
     case '/new':
       return <NewGameScreen />;
     case '/host':
-      return <HostScreen />;
+      return (
+        <>
+          <HostScreen />
+          <SoundCorner role="host" buttonClass="ks-btn ks-btn-sm ks-btn-ghost" promptClass="ks-btn ks-btn-primary animate-pulse" />
+        </>
+      );
     case '/game':
-      return <GameScreen />;
+      return (
+        <>
+          <GameScreen />
+          <SoundCorner role="display" buttonClass="ks-btn ks-btn-sm ks-btn-ghost" promptClass="ks-btn ks-btn-primary animate-pulse" />
+        </>
+      );
     case '/join':
       return <JoinScreen />;
     case '/remote':

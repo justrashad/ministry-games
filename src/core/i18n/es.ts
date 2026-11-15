@@ -1,5 +1,10 @@
 /* Spanish (neutral Latin American) for the text shared by every title. Keys are the English text; see i18n.ts. */
 export const CORE_ES: Record<string, string> = {
+  "Tap to turn on sound": "Toca para activar el sonido",
+  "Sound effects on": "Efectos de sonido activados",
+  "Sound effects off": "Efectos de sonido desactivados",
+  "Music on": "Música activada",
+  "Music off": "Música desactivada",
   "From Eden to Egypt": "Del Edén a Egipto",
   "Genesis: creation, Noah, Abraham, Jacob and Joseph.": "Génesis: la creación, Noé, Abrahán, Jacob y José.",
   "Exodus to the Judges": "Del Éxodo a los Jueces",

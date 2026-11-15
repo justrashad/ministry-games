@@ -1,3 +1,5 @@
+import { useSoundLeader } from '../../../core/audio/hooks';
+import { useGameSounds } from '../hooks/useGameEffects';
 import { useState, type ReactNode } from 'react';
 import { Check, Minus, MonitorPlay, Plus, X } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
@@ -93,6 +95,7 @@ function BoardPicker({ state }: { state: GameState }) {
 export function HostScreen() {
   const t = useT();
   const state = useGameState();
+  useGameSounds(state, useSoundLeader('host'));
   const [confirmEnd, setConfirmEnd] = useState(false);
   useKeyboardBuzzers();
 

@@ -1,54 +1,57 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { fireConfetti } from '../../../core/lib/confetti';
-import { sound, type SoundName } from '../../../core/lib/sound';
+import { playKit } from '../../../core/audio/sfx';
+import { useEventSounds, useMusic } from '../../../core/audio/useGameAudio';
+import { audio } from '../../../core/audio/engine';
+import { soundPrefs } from '../../../core/audio/prefs';
+import { KIT, type BabeSound } from '../audio/kit';
+import { OUTRO, THEME, THINK } from '../audio/music';
+import { rungs } from '../engine/game';
 import { dispatchGame, getGameState } from '../sync/gameStore';
-import type { GameEventKind, GameState } from '../types';
+import type { GameState } from '../types';
 
-const SOUNDS: Partial<Record<GameEventKind, SoundName>> = {
-  start: 'gameStart',
-  pick: 'reveal',
-  lookup: 'submit',
-  swap: 'reveal',
-  right: 'correct',
-  wrong: 'strike',
-  secondTry: 'steal',
-  bonus: 'finalRound',
-  gameOver: 'celebrate',
-};
 
-/** Plays each game moment's sound once on the TV, and confetti at the end. */
-export function useGameSounds(state: GameState | null): void {
-  const lastSeq = useRef<number | null>(null);
-  useEffect(() => {
-    if (!state) {
-      lastSeq.current = null;
-      return;
-    }
-    // Opening the screen in the middle of a game must not replay the last moment.
-    if (lastSeq.current === null) {
-      lastSeq.current = state.event.seq;
-      return;
-    }
-    if (state.event.seq === lastSeq.current) return;
-    lastSeq.current = state.event.seq;
-    const name = SOUNDS[state.event.kind];
-    if (name) sound.play(name);
-    const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (state.event.kind === 'gameOver' && !reduced) fireConfetti();
-  }, [state]);
+function celebrate(): void {
+  const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (!reduced) fireConfetti();
 }
 
-/** Browsers stay silent until someone clicks or presses a key on the page. */
-export function useUnlockSound(): void {
+/** Whether a team is still inside its Search the Scriptures minute. */
+function useLookupRunning(state: GameState | null): boolean {
+  const until = state?.active?.lookupUntil ?? 0;
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const unlock = () => void sound.unlock();
-    window.addEventListener('pointerdown', unlock, { once: true });
-    window.addEventListener('keydown', unlock, { once: true });
-    return () => {
-      window.removeEventListener('pointerdown', unlock);
-      window.removeEventListener('keydown', unlock);
-    };
-  }, []);
+    if (!until || until <= Date.now()) return;
+    const id = window.setInterval(() => setNow(Date.now()), 500);
+    return () => window.clearInterval(id);
+  }, [until]);
+  return !!state && (state.phase === 'question' || state.phase === 'missed') && until > now;
+}
+
+/**
+ * Sound and music for the game. `enabled` is true only in the window making
+ * sound (see useSoundLeader); `confetti` on the TV screen.
+ */
+export function useGameSounds(state: GameState | null, enabled: boolean, confetti = false): void {
+  useEventSounds(state, true, (s) => {
+    const kind = s.event.kind;
+    if (kind === 'gameOver' && confetti) celebrate();
+    if (!enabled) return;
+    if (kind === 'right') {
+      if (s.phase === 'bonusReveal') playKit(KIT, 'bonusRight');
+      else playClimb(rungs(s, s.event.team ?? s.active?.team ?? 0));
+      return;
+    }
+    if (kind !== 'none' && kind in KIT) playKit(KIT, kind as BabeSound);
+  });
+  const lookup = useLookupRunning(state);
+  const song = !state ? null : state.phase === 'intro' ? THEME : lookup ? THINK : state.phase === 'gameOver' ? OUTRO : null;
+  useMusic(song, enabled);
+}
+
+function playClimb(rung: number): void {
+  if (!soundPrefs.get().sfx) return;
+  audio.whenRunning((_ctx, t) => KIT.climb(t, rung));
 }
 
 /** Keyboard marking on the TV or host computer while a question is up: R for right, W for wrong. */

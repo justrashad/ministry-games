@@ -1,3 +1,5 @@
+import { useSoundLeader } from '../../../core/audio/hooks';
+import { useGameSounds } from '../hooks/useGameEffects';
 import { useState, type ReactNode } from 'react';
 import { BookOpen, Check, MonitorPlay, Shuffle, X } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
@@ -43,6 +45,7 @@ function LookupTimer({ until }: { until: number | null }) {
 export function HostScreen() {
   const t = useT();
   const state = useGameState();
+  useGameSounds(state, useSoundLeader('host'));
   const [confirmEnd, setConfirmEnd] = useState(false);
   useKeyboardJudge();
 
