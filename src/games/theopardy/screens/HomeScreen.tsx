@@ -1,5 +1,6 @@
 import { MonitorPlay, Play, Smartphone } from 'lucide-react';
 import { useT } from '../../../core/i18n/i18n';
+import { license } from '../commerce/license';
 import { Wordmark } from '../components/parts';
 import { navigate, routeUrl } from '../lib/router';
 import { useGameState } from '../sync/gameStore';
@@ -8,6 +9,7 @@ export function HomeScreen() {
   const t = useT();
   const state = useGameState();
   const inProgress = !!state && state.phase !== 'gameOver';
+  const unlocked = license.useGameUnlocked();
 
   return (
     <div className="flex flex-col gap-6">
@@ -26,13 +28,18 @@ export function HomeScreen() {
           </button>
         )}
         <button type="button" className={`tp-btn tp-btn-xl ${inProgress ? 'tp-btn-ghost' : 'tp-btn-accent'}`} onClick={() => navigate('/new')}>
-          {t('New game')}
+          {unlocked ? t('New game') : t('Try the free demo')}
         </button>
+        {!unlocked && (
+          <button type="button" className="tp-btn tp-btn-xl tp-btn-primary" onClick={() => navigate('/store')}>
+            {t('Unlock the full game')}
+          </button>
+        )}
         <a className="tp-btn tp-btn-xl tp-btn-ghost" href={routeUrl('/game')} target="theopardy-game" rel="noreferrer">
           <MonitorPlay aria-hidden className="h-7 w-7" />
           {t('Open the game screen')}
         </a>
-        <button type="button" className="tp-btn tp-btn-xl tp-btn-ghost sm:col-span-2" onClick={() => navigate('/join')}>
+        <button type="button" className={`tp-btn tp-btn-xl tp-btn-ghost ${unlocked ? 'sm:col-span-2' : ''}`} onClick={() => navigate('/join')}>
           <Smartphone aria-hidden className="h-7 w-7" />
           {t('Use this phone as a buzzer or remote')}
         </button>

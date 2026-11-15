@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /** Hash routing keeps the app backend-free and lets the built files open from any folder. */
-export const ROUTES = ['/', '/new', '/host', '/game', '/join', '/remote', '/buzzer'] as const;
+export const ROUTES = ['/', '/new', '/host', '/game', '/join', '/remote', '/buzzer', '/store'] as const;
 export type Route = (typeof ROUTES)[number];
 
 /** Screens that fill the whole display with no app header. */
@@ -41,11 +41,19 @@ export function routeUrl(route: Route, params?: Record<string, string>): string 
   return `${window.location.origin}${window.location.pathname}#${route}${query}`;
 }
 
-/** Typed addresses like "/join" (no "#") open the matching screen. */
+/**
+ * Typed addresses like "/join" (no "#") open the matching screen. The purchase email's button
+ * can't link to a "#/…" address, so buyers arrive at "/?key=XXXX": that key is moved onto the
+ * Store screen, where it is activated, and cleared from the address bar.
+ */
 export function adoptTypedPath(): void {
   if (typeof window === 'undefined') return;
   const path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
-  if (!path || path === '/index.html') return;
+  if (!path || path === '/index.html') {
+    const key = new URLSearchParams(window.location.search).get('key')?.trim();
+    if (key) window.history.replaceState(null, '', `${window.location.pathname}#/store?key=${encodeURIComponent(key)}`);
+    return;
+  }
   const route = (ROUTES as readonly string[]).includes(path) ? path : '/';
   const hash = window.location.hash && window.location.hash !== '#' ? window.location.hash : `#${route}${window.location.search}`;
   window.history.replaceState(null, '', `/${hash}`);

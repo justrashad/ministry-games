@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ES } from './es';
+import { CORE_ES } from '../../../core/i18n/es';
 import './register';
 import { interpolate, translate } from '../../../core/i18n/i18n';
 
@@ -32,7 +33,8 @@ function usedKeys(): Map<string, string> {
 
 describe('translations', () => {
   it('every piece of interface text has a Spanish translation', () => {
-    const missing = [...usedKeys()].filter(([k]) => !(k in ES)).map(([k, f]) => `${f.split('/src/')[1]}: ${k}`);
+    // Shared text is translated in core; this title's own text is in ES.
+    const missing = [...usedKeys()].filter(([k]) => !(k in ES) && !(k in CORE_ES)).map(([k, f]) => `${f.split('/src/')[1]}: ${k}`);
     expect(missing).toEqual([]);
   });
 

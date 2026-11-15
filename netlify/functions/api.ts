@@ -1,10 +1,12 @@
 import { lemonSqueezyClient, route, type Route } from '../../server/core/licensing';
 import type { TitleContent } from '../../server/core/licensing';
 import { SHOWDOWN_TITLE } from '../../server/showdown/title';
+import { THEOPARDY_TITLE } from '../../server/theopardy/title';
 
 /** Every title this function can serve. The site's TITLE setting picks one; with none set it is Ministry Showdown. */
 const TITLES: Record<string, TitleContent> = {
   showdown: SHOWDOWN_TITLE,
+  theopardy: THEOPARDY_TITLE,
 };
 
 const ROUTES: Record<string, Route> = {

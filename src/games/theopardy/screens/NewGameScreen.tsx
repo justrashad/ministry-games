@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useLang, useT } from '../../../core/i18n/i18n';
+import { DEMO, demoClues, license } from '../commerce/license';
 import { STARTER_PACK } from '../data/starterPack';
 import { STARTER_PACK_ES } from '../data/starterPackEs';
 import { BOARD_LIMITS, createGame, DEFAULT_TEAMS } from '../engine/createGame';
@@ -13,6 +14,7 @@ const CATEGORY_CHOICES = [3, 4, 5, 6];
 export function NewGameScreen() {
   const t = useT();
   const lang = useLang();
+  const unlocked = license.useGameUnlocked();
   const saved = setupStore.useValue();
   const [names, setNames] = useState<[string, string]>(saved.teamNames);
   const [rounds, setRounds] = useState(saved.rounds);
@@ -26,11 +28,12 @@ export function NewGameScreen() {
     e.preventDefault();
     const teamNames: [string, string] = [cleanTeamName(names[0]), cleanTeamName(names[1])];
     const pack = lang === 'es' ? STARTER_PACK_ES : STARTER_PACK;
+    // The free demo plays one short board from the first categories, with no final round.
     const result = createGame({
-      clues: pack.clues,
-      finals: pack.finals,
-      rounds,
-      categoriesPerRound: categories,
+      clues: unlocked ? pack.clues : demoClues(pack),
+      finals: unlocked ? pack.finals : [],
+      rounds: unlocked ? rounds : DEMO.rounds,
+      categoriesPerRound: unlocked ? categories : DEMO.categories,
       avoidIds: new Set(recentCluesStore.get()),
       teams: [
         { ...DEFAULT_TEAMS[0], name: teamNames[0] || t('Team 1') },
@@ -41,7 +44,7 @@ export function NewGameScreen() {
       setError(result.error);
       return;
     }
-    setupStore.set({ teamNames, rounds, categories });
+    setupStore.set(unlocked ? { teamNames, rounds, categories } : { ...saved, teamNames });
     const game = result.game;
     rememberClues([...game.boards.flatMap((b) => b.categories.flatMap((c) => c.tiles.map((tile) => tile.clue.id))), ...(game.final ? [game.final.clue.id] : [])]);
     dispatchGame({ type: 'NEW_GAME', game });
@@ -51,7 +54,7 @@ export function NewGameScreen() {
 
   return (
     <form className="flex flex-col gap-5" onSubmit={start}>
-      <h1 className="text-4xl">{t('New game')}</h1>
+      <h1 className="text-4xl">{unlocked ? t('New game') : t('Free demo')}</h1>
       {inProgress && <p className="rounded-xl border-2 border-ice-300 p-3 font-semibold text-ice-300">{t('A game is in progress. Starting a new one replaces it.')}</p>}
 
       <div className="tp-panel grid gap-4 sm:grid-cols-2">
@@ -72,7 +75,16 @@ export function NewGameScreen() {
         ))}
       </div>
 
-      <div className="tp-panel grid gap-5 sm:grid-cols-2">
+      {!unlocked && (
+        <div className="tp-panel flex flex-wrap items-center justify-between gap-4">
+          <p className="max-w-xl text-lg">{t('The demo is one short board with three categories. The full game has two rounds, up to six categories on each board, and the final round.')}</p>
+          <button type="button" className="tp-btn tp-btn-primary" onClick={() => navigate('/store')}>
+            {t('Unlock the full game')}
+          </button>
+        </div>
+      )}
+
+      <div className={`tp-panel grid gap-5 sm:grid-cols-2 ${unlocked ? '' : 'hidden'}`}>
         <fieldset>
           <legend className="tp-label">{t('Rounds')}</legend>
           <div className="flex gap-2">
@@ -109,7 +121,7 @@ export function NewGameScreen() {
       )}
 
       <button type="submit" className="tp-btn tp-btn-xl tp-btn-accent">
-        {t('Start game')}
+        {unlocked ? t('Start game') : t('Start the free demo')}
       </button>
     </form>
   );

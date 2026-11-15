@@ -1,5 +1,9 @@
 /* Spanish (neutral Latin American) for the text shared by every title. Keys are the English text; see i18n.ts. */
 export const CORE_ES: Record<string, string> = {
+  "Couldn't reach the store. Check your connection and try again.": "No se pudo conectar con la tienda. Revisa tu conexión e inténtalo de nuevo.",
+  "Paste the license key from your purchase email.": "Pega la clave de licencia del correo de tu compra.",
+  "The store sent an unexpected reply. Try again in a minute.": "La tienda envió una respuesta inesperada. Inténtalo de nuevo en un minuto.",
+  "You are offline. Connect to the internet and try again.": "No tienes conexión. Conéctate a internet e inténtalo de nuevo.",
   "A new version of {title} is ready.": "Hay una nueva versión de {title} lista.",
   "Close": "Cerrar",
   "Dismiss": "Cerrar",

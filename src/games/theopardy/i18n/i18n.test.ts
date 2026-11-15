@@ -18,7 +18,7 @@ const repo = join(__dirname, '..', '..', '..', '..');
 function usedKeys(): Map<string, string> {
   const keys = new Map<string, string>();
   const pattern = /\b(?:t|tr|msg)\(\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
-  const dirs = [join(repo, 'src', 'core'), join(repo, 'src', 'games', 'theopardy'), join(repo, 'server', 'core')];
+  const dirs = [join(repo, 'src', 'core'), join(repo, 'src', 'games', 'theopardy'), join(repo, 'server', 'core'), join(repo, 'server', 'theopardy')];
   for (const file of dirs.flatMap(sourceFiles)) {
     const text = readFileSync(file, 'utf8');
     for (const m of text.matchAll(pattern)) {
