@@ -42,6 +42,16 @@ export const TITLES: Record<string, TitleInfo> = {
     themeColor: '#0A2152',
     backgroundColor: '#0A2152',
   },
+  squares: {
+    id: 'squares',
+    name: 'Kingdom Squares',
+    shortName: 'Kingdom Squares',
+    description: 'A Bible true-or-false squares game for two teams, designed for family worship.',
+    storagePrefix: 'kingdom-squares:',
+    peerPrefix: 'kingdom-squares-v1-',
+    themeColor: '#4D6B1F',
+    backgroundColor: '#F6F3EA',
+  },
 };
 
 export const DEFAULT_TITLE = 'showdown';

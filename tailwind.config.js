@@ -46,6 +46,21 @@ export default {
           100: '#F4F8FF',
         },
         ice: { 300: '#9CC4FF', 400: '#7FB2FF', 900: '#06235E' },
+        // Kingdom Squares: the colors are CSS variables in src/games/squares/theme.css, so the colorway changes in one file.
+        ks: {
+          ground: 'var(--ks-ground)',
+          panel: 'var(--ks-panel)',
+          sunk: 'var(--ks-sunk)',
+          line: 'var(--ks-line)',
+          soft: 'var(--ks-soft)',
+          'soft-line': 'var(--ks-soft-line)',
+          'soft-text': 'var(--ks-soft-text)',
+          text: 'var(--ks-text)',
+          muted: 'var(--ks-muted)',
+          accent: 'var(--ks-accent)',
+          'on-accent': 'var(--ks-on-accent)',
+          alert: 'var(--ks-alert)',
+        },
       },
       fontFamily: {
         display: ['"Fredoka Variable"', 'Fredoka', 'ui-rounded', 'system-ui', 'sans-serif'],

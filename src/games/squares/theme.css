@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Kingdom Squares' colorway. Every color the game uses is one of these variables,
+ * so a different colorway is a change to this block only.
+ *
+ * Option A, Olive Grove: warm parchment ground, olive green for main actions and
+ * team 1, clay for team 2. Team 1 plays a ring and team 2 a diamond, so the teams
+ * differ by shape as well as color.
+ */
+:root {
+  color-scheme: light;
+  --ks-ground: #f6f3ea;
+  --ks-panel: #ffffff;
+  --ks-sunk: #efeadc;
+  --ks-line: #dcd5c2;
+  --ks-soft: #e6ebd8;
+  --ks-soft-line: #bcc79d;
+  --ks-soft-text: #5c6b3a;
+  --ks-text: #26301a;
+  --ks-muted: #56623f;
+  --ks-accent: #4d6b1f;
+  --ks-accent-hover: #3f5918;
+  --ks-on-accent: #ffffff;
+  --ks-alert: #9a3412;
+  --ks-team-0: #4d6b1f;
+  --ks-on-team-0: #ffffff;
+  --ks-team-1: #b4532a;
+  --ks-on-team-1: #ffffff;
+  --ks-radius: 16px;
+  --ks-font: 'Lexend Variable', Lexend, system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--ks-ground);
+    color: var(--ks-text);
+    font-family: var(--ks-font);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ks-accent);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .ks-btn {
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-lg font-bold transition-[transform,background-color,opacity] duration-150;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ks-btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+  .ks-btn:not(:disabled):active {
+    transform: translateY(2px);
+  }
+  .ks-btn-primary {
+    background-color: var(--ks-accent);
+    color: var(--ks-on-accent);
+  }
+  .ks-btn-primary:not(:disabled):hover {
+    background-color: var(--ks-accent-hover);
+  }
+  .ks-btn-ghost {
+    background-color: var(--ks-sunk);
+    color: var(--ks-text);
+  }
+  .ks-btn-ghost:not(:disabled):hover {
+    background-color: var(--ks-line);
+  }
+  .ks-btn-outline {
+    border: 2px solid var(--ks-accent);
+    color: var(--ks-accent);
+    background-color: transparent;
+  }
+  .ks-btn-danger {
+    border: 2px solid var(--ks-alert);
+    color: var(--ks-alert);
+    background-color: transparent;
+  }
+  .ks-btn-sm {
+    @apply min-h-[44px] px-3.5 py-1.5 text-base;
+  }
+  .ks-btn-xl {
+    @apply min-h-[64px] px-8 py-4 text-2xl;
+  }
+
+  .ks-panel {
+    @apply rounded-2xl p-5;
+    background-color: var(--ks-panel);
+    border: 1px solid var(--ks-line);
+  }
+  .ks-label {
+    @apply mb-1.5 block text-sm font-bold uppercase tracking-wide;
+    color: var(--ks-muted);
+  }
+  .ks-input {
+    @apply min-h-[48px] w-full rounded-xl px-4 text-lg font-semibold;
+    background-color: var(--ks-panel);
+    border: 2px solid var(--ks-line);
+    color: var(--ks-text);
+  }
+  .ks-input:focus {
+    border-color: var(--ks-accent);
+  }
+  .ks-muted {
+    color: var(--ks-muted);
+  }
+  .ks-alert {
+    @apply rounded-xl p-3 font-semibold;
+    border: 2px solid var(--ks-alert);
+    color: var(--ks-alert);
+  }
+
+  /* An open square on the board. */
+  .ks-open {
+    @apply flex items-center justify-center rounded-2xl font-semibold;
+    background-color: var(--ks-soft);
+    border: 3px solid var(--ks-soft-line);
+    color: var(--ks-soft-text);
+    font-variant-numeric: tabular-nums;
+  }
+  /* The square in play, or the winning line. */
+  .ks-ring {
+    box-shadow:
+      0 0 0 4px var(--ks-ground),
+      0 0 0 9px var(--ks-accent);
+  }
+  .ks-card {
+    background-color: var(--ks-accent);
+    color: var(--ks-on-accent);
+  }
+}
+
+/*
+ * Team colors. These sit outside the Tailwind layers on purpose: screens build the
+ * class name from the team number (ks-team-0, ks-team-1), and Tailwind drops layered
+ * classes it can't find written out in the code.
+ */
+.ks-team-0 {
+  background-color: var(--ks-team-0);
+  color: var(--ks-on-team-0);
+}
+.ks-team-1 {
+  background-color: var(--ks-team-1);
+  color: var(--ks-on-team-1);
+}
+
+@keyframes ks-pop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.ks-pop {
+  animation: ks-pop 0.28s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-pop {
+    animation: none;
+  }
+  .ks-btn {
+    transition: none;
+  }
+}
