@@ -2,6 +2,7 @@ import type { AlternateAnswer, Answer, Question, QuestionSet, QuestionSetExport 
 import { LIMITS, toFiniteNumber } from './defaults';
 import { uid } from '../lib/ids';
 import { english, type Tr } from '../i18n/msg';
+import { QUESTION_LIMITS, questionTypeOf, toLevel } from '../questions/types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -42,6 +43,8 @@ export function normalizeQuestion(raw: unknown, label = 'Question'): NormalizeRe
   const errors: string[] = [];
   const warnings: string[] = [];
   if (!isRecord(raw)) return { question: null, errors: [`${label} is not a question object.`], warnings };
+  // Clue and true/false questions belong to other titles; this game only plays survey questions.
+  if (questionTypeOf(raw) !== 'survey') return { question: null, errors: [`${label} is not a survey question, so Ministry Showdown can't use it.`], warnings };
 
   const text = typeof raw.question === 'string' ? raw.question.trim() : '';
   if (!text) errors.push(`${label} is missing its question text.`);
@@ -103,6 +106,9 @@ export function normalizeQuestion(raw: unknown, label = 'Question'): NormalizeRe
   }
   if (alternateAnswers.length > 0) question.alternateAnswers = alternateAnswers;
   if (typeof raw.notes === 'string' && raw.notes.trim()) question.notes = raw.notes.trim().slice(0, 500);
+  const level = toLevel(raw.level);
+  if (level !== null) question.level = level;
+  if (typeof raw.reference === 'string' && raw.reference.trim()) question.reference = raw.reference.trim().slice(0, QUESTION_LIMITS.reference);
   return { question, errors, warnings };
 }
 

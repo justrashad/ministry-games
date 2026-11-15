@@ -2,6 +2,8 @@
 /* Question library                                                          */
 /* ------------------------------------------------------------------------ */
 
+import type { Level } from './questions/types';
+
 export interface Answer {
   id: string;
   text: string;
@@ -30,6 +32,10 @@ export interface Question {
   /** Extra phrasings that should auto-match an answer in the Final Challenge. */
   alternateAnswers?: AlternateAnswer[];
   notes?: string;
+  /** Shared question format (src/questions): difficulty from 1 (easiest) to 5. Not used by the survey rules. */
+  level?: Level;
+  /** Shared question format: scripture citation, for example "Daniel 1:6". Never verse text. */
+  reference?: string;
 }
 
 export interface QuestionSet {
