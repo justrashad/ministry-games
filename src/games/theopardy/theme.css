@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theopardy!'s own look: deep navy ground, bright blue tiles with white numbers,
+ * coral for actions and focus. Team 1 is coral, team 2 is mint. No gold anywhere.
+ */
+
+:root {
+  color-scheme: dark;
+  --tp-radius: 12px;
+  --tp-font: 'Outfit Variable', Outfit, system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: #061a2e;
+    color: #eaf3ff;
+    font-family: var(--tp-font);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 3px solid #ff8a5b;
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: rgba(22, 104, 227, 0.55);
+  }
+}
+
+@layer components {
+  .tp-btn {
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-lg font-bold transition-[transform,background-color,opacity] duration-150;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tp-btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+  .tp-btn:not(:disabled):active {
+    transform: translateY(2px);
+  }
+  .tp-btn-primary {
+    @apply bg-sea-500 text-white hover:bg-sea-400;
+  }
+  .tp-btn-accent {
+    @apply bg-coral-400 text-coral-900 hover:bg-coral-300;
+  }
+  .tp-btn-ghost {
+    @apply bg-sea-700 text-sea-100 hover:bg-sea-600;
+  }
+  .tp-btn-good {
+    @apply bg-mint-300 text-mint-900 hover:brightness-105;
+  }
+  .tp-btn-bad {
+    @apply border-2 border-coral-400 bg-transparent text-coral-300 hover:bg-coral-400/10;
+  }
+  .tp-btn-sm {
+    @apply min-h-[44px] px-3.5 py-1.5 text-base;
+  }
+  .tp-btn-xl {
+    @apply min-h-[64px] px-8 py-4 text-2xl;
+  }
+
+  .tp-panel {
+    @apply rounded-2xl bg-sea-800 p-5;
+  }
+  .tp-label {
+    @apply mb-1.5 block text-sm font-bold uppercase tracking-wide text-sea-300;
+  }
+  .tp-input {
+    @apply min-h-[48px] w-full rounded-xl border-2 border-sea-700 bg-sea-900 px-4 text-lg font-semibold text-sea-100 placeholder:text-sea-300/60;
+  }
+  .tp-input:focus {
+    @apply border-sea-400;
+  }
+  .tp-muted {
+    @apply text-sea-300;
+  }
+
+  /* TV board */
+  .tp-tile {
+    @apply flex items-center justify-center rounded-xl bg-sea-500 font-extrabold text-white;
+    font-variant-numeric: tabular-nums;
+  }
+  .tp-tile-done {
+    @apply rounded-xl border-2 border-sea-700 bg-transparent;
+  }
+  .tp-category {
+    @apply flex items-center justify-center rounded-xl bg-sea-800 px-2 text-center font-bold uppercase leading-tight tracking-wide text-sea-100;
+  }
+}
+
+/*
+ * Team colors. These sit outside the Tailwind layers on purpose: screens build the
+ * class name from the team number (tp-team-0, tp-team-1), and Tailwind drops layered
+ * classes it can't find written out in the code.
+ */
+.tp-team-0 {
+  background-color: #ffd3b8;
+  color: #3b1503;
+}
+.tp-team-1 {
+  background-color: #8ef0d0;
+  color: #053527;
+}
+
+@keyframes tp-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.tp-pop {
+  animation: tp-pop 0.28s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-pop {
+    animation: none;
+  }
+  .tp-btn {
+    transition: none;
+  }
+}

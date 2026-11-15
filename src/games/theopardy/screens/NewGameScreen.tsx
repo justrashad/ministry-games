@@ -1,0 +1,116 @@
+import { useState, type FormEvent } from 'react';
+import { useLang, useT } from '../../../core/i18n/i18n';
+import { STARTER_PACK } from '../data/starterPack';
+import { STARTER_PACK_ES } from '../data/starterPackEs';
+import { BOARD_LIMITS, createGame, DEFAULT_TEAMS } from '../engine/createGame';
+import { navigate, routeUrl } from '../lib/router';
+import { cleanTeamName, recentCluesStore, rememberClues, setupStore } from '../state/setupStore';
+import { dispatchGame, getGameState } from '../sync/gameStore';
+
+const ROUND_CHOICES = [1, 2];
+const CATEGORY_CHOICES = [3, 4, 5, 6];
+
+export function NewGameScreen() {
+  const t = useT();
+  const lang = useLang();
+  const saved = setupStore.useValue();
+  const [names, setNames] = useState<[string, string]>(saved.teamNames);
+  const [rounds, setRounds] = useState(saved.rounds);
+  const [categories, setCategories] = useState(saved.categories);
+  const [openTv, setOpenTv] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const running = getGameState();
+  const inProgress = !!running && running.phase !== 'gameOver';
+
+  const start = (e: FormEvent) => {
+    e.preventDefault();
+    const teamNames: [string, string] = [cleanTeamName(names[0]), cleanTeamName(names[1])];
+    const pack = lang === 'es' ? STARTER_PACK_ES : STARTER_PACK;
+    const result = createGame({
+      clues: pack.clues,
+      finals: pack.finals,
+      rounds,
+      categoriesPerRound: categories,
+      avoidIds: new Set(recentCluesStore.get()),
+      teams: [
+        { ...DEFAULT_TEAMS[0], name: teamNames[0] || t('Team 1') },
+        { ...DEFAULT_TEAMS[1], name: teamNames[1] || t('Team 2') },
+      ],
+    });
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setupStore.set({ teamNames, rounds, categories });
+    const game = result.game;
+    rememberClues([...game.boards.flatMap((b) => b.categories.flatMap((c) => c.tiles.map((tile) => tile.clue.id))), ...(game.final ? [game.final.clue.id] : [])]);
+    dispatchGame({ type: 'NEW_GAME', game });
+    if (openTv) window.open(routeUrl('/game'), 'theopardy-game');
+    navigate('/host');
+  };
+
+  return (
+    <form className="flex flex-col gap-5" onSubmit={start}>
+      <h1 className="text-4xl">{t('New game')}</h1>
+      {inProgress && <p className="rounded-xl border-2 border-coral-400 p-3 font-semibold text-coral-300">{t('A game is in progress. Starting a new one replaces it.')}</p>}
+
+      <div className="tp-panel grid gap-4 sm:grid-cols-2">
+        {[0, 1].map((i) => (
+          <div key={i}>
+            <label className="tp-label" htmlFor={`team-${i}`}>
+              {i === 0 ? t('Team 1 name') : t('Team 2 name')}
+            </label>
+            <input
+              id={`team-${i}`}
+              className="tp-input"
+              maxLength={24}
+              placeholder={i === 0 ? t('Team 1') : t('Team 2')}
+              value={names[i]}
+              onChange={(e) => setNames(i === 0 ? [e.target.value, names[1]] : [names[0], e.target.value])}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="tp-panel grid gap-5 sm:grid-cols-2">
+        <fieldset>
+          <legend className="tp-label">{t('Rounds')}</legend>
+          <div className="flex gap-2">
+            {ROUND_CHOICES.filter((n) => n >= BOARD_LIMITS.rounds.min && n <= BOARD_LIMITS.rounds.max).map((n) => (
+              <button key={n} type="button" className={`tp-btn flex-1 ${rounds === n ? 'tp-btn-primary' : 'tp-btn-ghost'}`} aria-pressed={rounds === n} onClick={() => setRounds(n)}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-sm tp-muted">{t('The second round is worth double.')}</p>
+        </fieldset>
+        <fieldset>
+          <legend className="tp-label">{t('Categories on each board')}</legend>
+          <div className="flex gap-2">
+            {CATEGORY_CHOICES.map((n) => (
+              <button key={n} type="button" className={`tp-btn flex-1 ${categories === n ? 'tp-btn-primary' : 'tp-btn-ghost'}`} aria-pressed={categories === n} onClick={() => setCategories(n)}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-sm tp-muted">{t('Fewer categories make a shorter game.')}</p>
+        </fieldset>
+      </div>
+
+      <label className="flex items-center gap-3 text-lg font-semibold">
+        <input type="checkbox" className="h-6 w-6 accent-coral-400" checked={openTv} onChange={(e) => setOpenTv(e.target.checked)} />
+        {t('Open the game screen in a new window for the TV')}
+      </label>
+
+      {error && (
+        <p className="rounded-xl border-2 border-coral-400 p-3 font-semibold text-coral-300" role="alert">
+          {error}
+        </p>
+      )}
+
+      <button type="submit" className="tp-btn tp-btn-xl tp-btn-accent">
+        {t('Start game')}
+      </button>
+    </form>
+  );
+}
